@@ -139,6 +139,11 @@ return new ICadGenerator(){
 				// move the horn from tip of the link space, to the Motor of the last link space
 				// note the hore is moved to the centerline distance value before the transform to link space
 				CSG myServoHorn = moveDHValues(resinPrintServoMount.movez(distanceToMotorTop),d,linkIndex)
+				if(linkIndex==0)
+					myServoHorn.addAssemblyStep(2, new Transform().movey(-100))
+				else
+					myServoHorn.addAssemblyStep(2, new Transform().movez(100))
+					
 				// attach this links manipulator
 				myServoHorn.setManipulator(dGetLinkObjectManipulator)
 				back.add(myServoHorn)
