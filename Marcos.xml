@@ -819,7 +819,7 @@
 <name>Head</name>
 	<cadEngine>
 		<git>https://github.com/OperationSmallKat/Marcos.git</git>
-		<file>MarcosCad.groovy</file>
+		<file>HeadCad.groovy</file>
 	</cadEngine>
 	<kinematics>
 		<git>https://github.com/OperationSmallKat/Marcos.git</git>
@@ -964,7 +964,7 @@
 <name>Tail</name>
 	<cadEngine>
 		<git>https://github.com/OperationSmallKat/Marcos.git</git>
-		<file>MarcosCad.groovy</file>
+		<file>TailCad.groovy</file>
 	</cadEngine>
 	<kinematics>
 		<git>https://github.com/OperationSmallKat/Marcos.git</git>

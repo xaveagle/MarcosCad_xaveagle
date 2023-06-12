@@ -30,7 +30,6 @@ return new ICadGenerator(){
 			CSG limbRoot =new Cube(1).toCSG()
 			limbRoot.setManipulator(kin.getRootListener())
 			back.add(limbRoot)
-
 		}
 		return back;
 	}
