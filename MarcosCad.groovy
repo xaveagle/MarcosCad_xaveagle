@@ -6,10 +6,11 @@ import com.neuronrobotics.sdk.addons.kinematics.MobileBase
 import eu.mihosoft.vrl.v3d.CSG
 import eu.mihosoft.vrl.v3d.Cube
 File parametricsCSV = ScriptingEngine.fileFromGit("https://github.com/OperationSmallKat/Marcos.git", "parametrics.csv")
-HashMap<String,String> measurments=new HashMap<>()
 HashMap<String,Double> numbers;
 BufferedReader reader;
 String code="HashMap<String,Double> numbers = new HashMap<>()\n"
+String vars=""
+String equs=""
 try {
 	reader = new BufferedReader(new FileReader(parametricsCSV.getAbsolutePath()));
 	String line = reader.readLine();
@@ -17,16 +18,24 @@ try {
 		if(line.length()>3) {
 			//System.out.println(line);
 			String[] parts = line.split(",");
-			String reconstructed =parts[0]+"="+parts[2].replaceAll("mm", "");
-			measurments.put(parts[0], reconstructed)
-			code+= reconstructed+"\n"
-			code+="numbers.put(\""+parts[0]+"\","+parts[0]+");\n"
+			String value=(parts[2].replaceAll(parts[1], "")).trim()
+			String reconstructed =parts[0]+"="+value;
+			try {
+				Double.parseDouble(value)
+				vars+= reconstructed+"\n"
+				vars+="numbers.put(\""+parts[0]+"\","+parts[0]+");\n"
+			}catch(NumberFormatException ex) {
+				equs+= reconstructed+"\n"
+				equs+="numbers.put(\""+parts[0]+"\","+parts[0]+");\n"
+			}
 		}
 	}
 	reader.close();
 } catch (IOException e) {
 	e.printStackTrace();
 }
+code+=vars;
+code+=equs;
 code+="return numbers"
 println code
 numbers=(HashMap<String,Double>) ScriptingEngine.inlineScriptStringRun(code, null, "Groovy");
