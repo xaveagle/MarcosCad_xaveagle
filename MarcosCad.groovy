@@ -37,7 +37,7 @@ try {
 code+=vars;
 code+=equs;
 code+="return numbers"
-println code
+//println code
 numbers=(HashMap<String,Double>) ScriptingEngine.inlineScriptStringRun(code, null, "Groovy");
 for(String key :numbers.keySet()) {
 	println key+" : "+numbers.get(key)
