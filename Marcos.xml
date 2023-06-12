@@ -18,8 +18,8 @@
 		<file>MarcosCad.groovy</file>
 	</cadEngine>
 	<kinematics>
-		<git>https://github.com/madhephaestus/6dofServoArm.git</git>
-		<file>DefaultDhSolver.groovy</file>
+		<git>https://github.com/OperationSmallKat/Marcos.git</git>
+		<file>MarcosKinematics.groovy</file>
 	</kinematics>
 <link>
 	<name>basePan</name>
