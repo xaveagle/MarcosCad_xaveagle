@@ -1,8 +1,8 @@
 <root>
 <mobilebase>
 	<cadEngine>
-		<git>https://github.com/OperationSmallKat/Isis.git</git>
-		<file>IsisCad.groovy</file>
+		<git>https://github.com/OperationSmallKat/Marcos.git</git>
+		<file>MarcosCad.groovy</file>
 	</cadEngine>
 	<driveEngine>
 		<git>https://github.com/OperationSmallKat/SmallKat_V2.git</git>
@@ -14,8 +14,8 @@
 
 <name>LeftRear</name>
 	<cadEngine>
-		<git>https://github.com/OperationSmallKat/Isis.git</git>
-		<file>IsisCad.groovy</file>
+		<git>https://github.com/OperationSmallKat/Marcos.git</git>
+		<file>MarcosCad.groovy</file>
 	</cadEngine>
 	<kinematics>
 		<git>https://github.com/madhephaestus/6dofServoArm.git</git>
@@ -215,8 +215,8 @@
 
 <name>RightFront</name>
 	<cadEngine>
-		<git>https://github.com/OperationSmallKat/Isis.git</git>
-		<file>IsisCad.groovy</file>
+		<git>https://github.com/OperationSmallKat/Marcos.git</git>
+		<file>MarcosCad.groovy</file>
 	</cadEngine>
 	<kinematics>
 		<git>https://github.com/madhephaestus/6dofServoArm.git</git>
@@ -416,8 +416,8 @@
 
 <name>LeftFront</name>
 	<cadEngine>
-		<git>https://github.com/OperationSmallKat/Isis.git</git>
-		<file>IsisCad.groovy</file>
+		<git>https://github.com/OperationSmallKat/Marcos.git</git>
+		<file>MarcosCad.groovy</file>
 	</cadEngine>
 	<kinematics>
 		<git>https://github.com/madhephaestus/6dofServoArm.git</git>
@@ -617,8 +617,8 @@
 
 <name>RightRear</name>
 	<cadEngine>
-		<git>https://github.com/OperationSmallKat/Isis.git</git>
-		<file>IsisCad.groovy</file>
+		<git>https://github.com/OperationSmallKat/Marcos.git</git>
+		<file>MarcosCad.groovy</file>
 	</cadEngine>
 	<kinematics>
 		<git>https://github.com/madhephaestus/6dofServoArm.git</git>
@@ -818,8 +818,8 @@
 
 <name>Head</name>
 	<cadEngine>
-		<git>https://github.com/OperationSmallKat/Isis.git</git>
-		<file>IsisCad.groovy</file>
+		<git>https://github.com/OperationSmallKat/Marcos.git</git>
+		<file>MarcosCad.groovy</file>
 	</cadEngine>
 	<kinematics>
 		<git>https://github.com/madhephaestus/carl-the-hexapod.git</git>
@@ -963,8 +963,8 @@
 
 <name>Tail</name>
 	<cadEngine>
-		<git>https://github.com/OperationSmallKat/Isis.git</git>
-		<file>IsisCad.groovy</file>
+		<git>https://github.com/OperationSmallKat/Marcos.git</git>
+		<file>MarcosCad.groovy</file>
 	</cadEngine>
 	<kinematics>
 		<git>https://github.com/madhephaestus/carl-the-hexapod.git</git>
