@@ -1,4 +1,3 @@
-import com.neuronrobotics.bowlerstudio.BowlerStudio
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics
 import com.neuronrobotics.sdk.addons.kinematics.IDriveEngine
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase
