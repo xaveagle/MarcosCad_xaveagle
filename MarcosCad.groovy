@@ -9,12 +9,22 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR
 
 import eu.mihosoft.vrl.v3d.CSG
 import eu.mihosoft.vrl.v3d.Cube
+import eu.mihosoft.vrl.v3d.Cylinder
 import eu.mihosoft.vrl.v3d.PrepForManufacturing
 import eu.mihosoft.vrl.v3d.Sphere
 import eu.mihosoft.vrl.v3d.Transform
+import javafx.scene.paint.Color
 import javafx.scene.transform.Affine
 import eu.mihosoft.vrl.v3d.ChamferedCylinder
 
+CSG ChamferedCylinder(double r, double h, double chamferHeight) {
+	CSG cube1 = new Cylinder(r - chamferHeight,r - chamferHeight, h,40).toCSG();
+	CSG cube2 = new Cylinder(r,r, h - chamferHeight * 2,40).toCSG().movez(chamferHeight);
+	return cube1.union(cube2).hull()
+}
+double computeGearPitch(double diameterAtCrown,double numberOfTeeth){
+	return ((diameterAtCrown/2)*((360.0)/numberOfTeeth)*Math.PI/180)
+}
 
 
 File parametricsCSV = ScriptingEngine.fileFromGit("https://github.com/OperationSmallKat/Marcos.git", "parametrics.csv")
@@ -51,13 +61,41 @@ code+=equs;
 code+="return numbers"
 //println code
 numbers=(HashMap<String,Double>) ScriptingEngine.inlineScriptStringRun(code, null, "Groovy");
-for(String key :numbers.keySet()) {
-	println key+" : "+numbers.get(key)
-}
+//for(String key :numbers.keySet()) {
+//	println key+" : "+numbers.get(key)
+//}
 
-
-return new ChamferedCylinder(numbers.ServoHornDiameter,numbers.ServoHornHeight,0.5).toCSG()
-
+// Begin creating the resin print horn piece withn a chamfered cylendar
+CSG core=  ChamferedCylinder(numbers.ServoHornDiameter/2.0,numbers.ServoHornHeight,numbers.Chamfer2)
+//calculate the depth of the screw head based on the given measurments
+double cutoutDepth = numbers.ServoHornHeight-numbers.ServoMountingScrewSpace - numbers.ServoHornSplineHeight
+// the cutout for the head of the screw on the resin horn
+CSG screwHeadCutOut = new Cylinder(numbers.ServoHornScrewHeadDiamter/2.0,numbers.ServoHornScrewHeadDiamter/2.0, cutoutDepth,30).toCSG()
+						.toZMax()
+						.movez(numbers.ServoHornHeight)
+// cutout for the hole the shaft of the mount screw passes through
+CSG screwHoleCutOut = new Cylinder(numbers.ServoHornScrewDiamter/2.0,numbers.ServoHornScrewDiamter/2.0, numbers.ServoMountingScrewSpace,30).toCSG()
+						.toZMax()
+						.movez(numbers.ServoHornHeight-cutoutDepth)
+// Cut the holes from the core
+core=core.difference([screwHeadCutOut,screwHoleCutOut])
+// use the gear maker to generate the spline
+def gears = ScriptingEngine.gitScriptRun(
+	"https://github.com/madhephaestus/GearGenerator.git", // git location of the library
+	"bevelGear.groovy" , // file to load
+	// Parameters passed to the funcetion
+	[	  numbers.ServoHornNumberofTeeth,// Number of teeth gear a
+		numbers.ServoHornNumberofTeeth,// Number of teeth gear b
+		numbers.ServoHornSplineHeight,// thickness of gear A
+		numbers.ServoHornToothBaseWidth,// gear pitch in arc length mm
+	   0,// shaft angle, can be from 0 to 100 degrees
+		0// helical angle, only used for 0 degree bevels
+	]
+	)
+// get just the pinion of the set
+CSG spline = gears.get(0)
+// cut the spline from the core
+CSG resinPrintServoMount=core.difference(spline)
 
 return new ICadGenerator(){
 			CSG moveDHValues(CSG incoming,DHParameterKinematics d, int linkIndex ){
@@ -65,9 +103,9 @@ return new ICadGenerator(){
 				Transform move = com.neuronrobotics.bowlerstudio.physics.TransformFactory.nrToCSG(step)
 				return incoming.transformed(move)
 			}
-			
-			
-			
+
+
+
 			@Override
 			public ArrayList<CSG> generateCad(DHParameterKinematics d, int linkIndex) {
 				// read motor typ information out of the link configuration
@@ -76,7 +114,7 @@ return new ICadGenerator(){
 				CSG motor = Vitamins.get(conf.getElectroMechanicalType(),conf.getElectroMechanicalSize())
 				// Is this value actually something in the CSV?
 				double distanceToMotorTop = motor.getMaxZ();
-				
+
 				// a list of CSG objects to be rendered
 				ArrayList<CSG> back =[]
 				// get the UI manipulator for the link
@@ -89,14 +127,22 @@ return new ICadGenerator(){
 					// pull the limb servos out the top
 					motor.addAssemblyStep(1, new Transform().movex(-100))
 				}else {
-					// the rest of the motors are located in the preior link's kinematic frame 
+					// the rest of the motors are located in the preior link's kinematic frame
 					motor.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
 					// pull the link motors out the thin side
 					motor.addAssemblyStep(1, new Transform().movey(-100))
 				}
 				// do not export the motors to STL for manufacturing
 				motor.setManufacturing({return null})
-				
+				motor.setColor(Color.BLUE)
+				//Start the horn link
+				// move the horn from tip of the link space, to the Motor of the last link space
+				// note the hore is moved to the centerline distance value before the transform to link space
+				CSG myServoHorn = moveDHValues(resinPrintServoMount.movez(distanceToMotorTop),d,linkIndex)
+				// attach this links manipulator
+				myServoHorn.setManipulator(dGetLinkObjectManipulator)
+				back.add(myServoHorn)
+				//end horn link
 				if(linkIndex==2) {
 					// this section is a place holder to visualize the tip of the limb
 					CSG foot = new Sphere(10).toCSG()
