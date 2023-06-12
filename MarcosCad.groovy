@@ -157,7 +157,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 						if(resinBed==null)
 							resinBed=moved
 						else
-							resinBed=resinBed.union(moved)
+							resinBed=resinBed.dumbUnion(moved)
 					}
 				}catch(Exception ex) {
 					ex.printStackTrace()
