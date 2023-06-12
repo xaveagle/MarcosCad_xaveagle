@@ -1,4 +1,5 @@
 import com.neuronrobotics.bowlerstudio.creature.ICadGenerator
+import com.neuronrobotics.bowlerstudio.creature.IgenerateBed
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins
 import com.neuronrobotics.sdk.addons.kinematics.DHLink
@@ -71,107 +72,185 @@ CSG core=  ChamferedCylinder(numbers.ServoHornDiameter/2.0,numbers.ServoHornHeig
 double cutoutDepth = numbers.ServoHornHeight-numbers.ServoMountingScrewSpace - numbers.ServoHornSplineHeight
 // the cutout for the head of the screw on the resin horn
 CSG screwHeadCutOut = new Cylinder(numbers.ServoHornScrewHeadDiamter/2.0,numbers.ServoHornScrewHeadDiamter/2.0, cutoutDepth,30).toCSG()
-						.toZMax()
-						.movez(numbers.ServoHornHeight)
+		.toZMax()
+		.movez(numbers.ServoHornHeight)
 // cutout for the hole the shaft of the mount screw passes through
 CSG screwHoleCutOut = new Cylinder(numbers.ServoHornScrewDiamter/2.0,numbers.ServoHornScrewDiamter/2.0, numbers.ServoMountingScrewSpace,30).toCSG()
-						.toZMax()
-						.movez(numbers.ServoHornHeight-cutoutDepth)
+		.toZMax()
+		.movez(numbers.ServoHornHeight-cutoutDepth)
 // Cut the holes from the core
-core=core.difference([screwHeadCutOut,screwHoleCutOut])
+core=core.difference([
+	screwHeadCutOut,
+	screwHoleCutOut
+])
 // use the gear maker to generate the spline
 def gears = ScriptingEngine.gitScriptRun(
-	"https://github.com/madhephaestus/GearGenerator.git", // git location of the library
-	"bevelGear.groovy" , // file to load
-	// Parameters passed to the funcetion
-	[	  numbers.ServoHornNumberofTeeth,// Number of teeth gear a
-		numbers.ServoHornNumberofTeeth,// Number of teeth gear b
-		numbers.ServoHornSplineHeight,// thickness of gear A
-		numbers.ServoHornToothBaseWidth,// gear pitch in arc length mm
-	   0,// shaft angle, can be from 0 to 100 degrees
-		0// helical angle, only used for 0 degree bevels
-	]
-	)
+		"https://github.com/madhephaestus/GearGenerator.git", // git location of the library
+		"bevelGear.groovy" , // file to load
+		// Parameters passed to the funcetion
+		[
+			numbers.ServoHornNumberofTeeth,
+			// Number of teeth gear a
+			numbers.ServoHornNumberofTeeth,
+			// Number of teeth gear b
+			numbers.ServoHornSplineHeight,
+			// thickness of gear A
+			numbers.ServoHornToothBaseWidth,
+			// gear pitch in arc length mm
+			0,
+			// shaft angle, can be from 0 to 100 degrees
+			0// helical angle, only used for 0 degree bevels
+		]
+		)
 // get just the pinion of the set
 CSG spline = gears.get(0)
 // cut the spline from the core
 CSG resinPrintServoMount=core.difference(spline)
 
-return new ICadGenerator(){
-			CSG moveDHValues(CSG incoming,DHParameterKinematics d, int linkIndex ){
-				TransformNR step = new TransformNR(d.getChain().getLinks().get(linkIndex).DhStep(0)).inverse()
-				Transform move = com.neuronrobotics.bowlerstudio.physics.TransformFactory.nrToCSG(step)
-				return incoming.transformed(move)
-			}
-
-
-
-			@Override
-			public ArrayList<CSG> generateCad(DHParameterKinematics d, int linkIndex) {
-				// read motor typ information out of the link configuration
-				LinkConfiguration conf = d.getLinkConfiguration(linkIndex);
-				// load the vitamin for the servo
-				CSG motor = Vitamins.get(conf.getElectroMechanicalType(),conf.getElectroMechanicalSize())
-				// Is this value actually something in the CSV?
-				double distanceToMotorTop = motor.getMaxZ();
-
-				// a list of CSG objects to be rendered
-				ArrayList<CSG> back =[]
-				// get the UI manipulator for the link
-				Affine dGetLinkObjectManipulator = d.getLinkObjectManipulator(linkIndex)
-				// UI manipulator for the root of the limb
-				Affine root = d.getRootListener()
-				if(linkIndex==0) {
-					// the first link motor is located in the body
-					motor.setManipulator(root)
-					// pull the limb servos out the top
-					motor.addAssemblyStep(1, new Transform().movex(-100))
-				}else {
-					// the rest of the motors are located in the preior link's kinematic frame
-					motor.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
-					// pull the link motors out the thin side
-					motor.addAssemblyStep(1, new Transform().movey(-100))
+class cadGenMarcos implements ICadGenerator,IgenerateBed{
+	CSG resinPrintServoMount
+	HashMap<String,Double> numbers
+	public cadGenMarcos(CSG res,HashMap<String,Double> n) {
+		resinPrintServoMount=res
+		numbers=n
+	}
+	ArrayList<CSG> cache = new ArrayList<CSG>()
+	CSG moveDHValues(CSG incoming,DHParameterKinematics d, int linkIndex ){
+		TransformNR step = new TransformNR(d.getChain().getLinks().get(linkIndex).DhStep(0)).inverse()
+		Transform move = com.neuronrobotics.bowlerstudio.physics.TransformFactory.nrToCSG(step)
+		return incoming.transformed(move)
+	}
+	CSG reverseDHValues(CSG incoming,DHParameterKinematics d, int linkIndex ){
+		TransformNR step = new TransformNR(d.getChain().getLinks().get(linkIndex).DhStep(0))
+		Transform move = com.neuronrobotics.bowlerstudio.physics.TransformFactory.nrToCSG(step)
+		return incoming.transformed(move)
+	}
+	/**
+	 * This function should generate the bed or beds or parts to be used in manufacturing If parts are
+	 * to be ganged up to make print beds then this should happen here
+	 *
+	 * @param base the base to generate
+	 * @return simulatable CAD objects
+	 */
+	public ArrayList<CSG> arrangeBed(MobileBase base){
+		println "Generating Marcos Print Bed"
+		ArrayList<CSG> resin = []
+		for(CSG bit :cache) {
+			def bitGetStorageGetValue = bit.getStorage().getValue("bedType")
+			if(bitGetStorageGetValue.present) {
+				if(bitGetStorageGetValue.get().toString().contentEquals("resin")) {
+					resin.add(bit)
 				}
-				// do not export the motors to STL for manufacturing
-				motor.setManufacturing({return null})
-				motor.setColor(Color.BLUE)
-				//Start the horn link
-				// move the horn from tip of the link space, to the Motor of the last link space
-				// note the hore is moved to the centerline distance value before the transform to link space
-				CSG myServoHorn = moveDHValues(resinPrintServoMount.movez(distanceToMotorTop),d,linkIndex)
-				if(linkIndex==0)
-					myServoHorn.addAssemblyStep(2, new Transform().movey(-100))
-				else
-					myServoHorn.addAssemblyStep(2, new Transform().movez(100))
-					
-				// attach this links manipulator
-				myServoHorn.setManipulator(dGetLinkObjectManipulator)
-				back.add(myServoHorn)
-				//end horn link
-				if(linkIndex==2) {
-					// this section is a place holder to visualize the tip of the limb
-					CSG foot = new Sphere(10).toCSG()
-					foot.setManipulator(dGetLinkObjectManipulator)
-					back.add(foot)
-				}
-				back.add(motor)
-				return back;
 			}
-
-			@Override
-			public ArrayList<CSG> generateBody(MobileBase arg0) {
-				// TODO Auto-generated method stub
-				ArrayList<CSG> back =[]
-				back.add(new Cube(1).toCSG())
-				for(CSG c:back)
-					c.setManipulator(arg0.getRootListener())
-				for(DHParameterKinematics kin:arg0.getAllDHChains()) {
-					CSG limbRoot =new Cube(1).toCSG()
-					limbRoot.setManipulator(kin.getRootListener())
-					back.add(limbRoot)
-				}
-				return back;
-			}
-
-
 		}
+		CSG resinBed=null
+		for(int i=0;i<4;i++) {
+			for (int j=0;j<4;j++) {
+				double x = i*(numbers.ServoHornDiameter)
+				double y = j*(numbers.ServoHornDiameter+1.0)
+				try {
+					int index = i+(j*4)
+					if(index<resin.size()) {
+						println "Adding resin horn to resin bed "+index
+						CSG part =resin[index].prepForManufacturing()
+						CSG moved = part.movex(x).movey(y)
+						if(resinBed==null)
+							resinBed=moved
+						else
+							resinBed=resinBed.union(moved)
+					}
+				}catch(Exception ex) {
+					ex.printStackTrace()
+				}
+			}
+		}
+
+		resinBed.setName("Print Bed Resin Printer")
+		
+		return [resinBed]
+
+	}
+
+	@Override
+	public ArrayList<CSG> generateCad(DHParameterKinematics d, int linkIndex) {
+		// read motor typ information out of the link configuration
+		LinkConfiguration conf = d.getLinkConfiguration(linkIndex);
+		// load the vitamin for the servo
+		CSG motor = Vitamins.get(conf.getElectroMechanicalType(),conf.getElectroMechanicalSize())
+		// Is this value actually something in the CSV?
+		double distanceToMotorTop = motor.getMaxZ();
+
+		// a list of CSG objects to be rendered
+		ArrayList<CSG> back =[]
+		// get the UI manipulator for the link
+		Affine dGetLinkObjectManipulator = d.getLinkObjectManipulator(linkIndex)
+		// UI manipulator for the root of the limb
+		Affine root = d.getRootListener()
+		if(linkIndex==0) {
+			// the first link motor is located in the body
+			motor.setManipulator(root)
+			// pull the limb servos out the top
+			motor.addAssemblyStep(1, new Transform().movex(-100))
+		}else {
+			// the rest of the motors are located in the preior link's kinematic frame
+			motor.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
+			// pull the link motors out the thin side
+			motor.addAssemblyStep(1, new Transform().movey(-100))
+		}
+		// do not export the motors to STL for manufacturing
+		motor.setManufacturing({return null})
+		motor.setColor(Color.BLUE)
+		//Start the horn link
+		// move the horn from tip of the link space, to the Motor of the last link space
+		// note the hore is moved to the centerline distance value before the transform to link space
+		CSG myServoHorn = moveDHValues(resinPrintServoMount.movez(distanceToMotorTop),d,linkIndex)
+		if(linkIndex==0)
+			myServoHorn.addAssemblyStep(2, new Transform().movey(-10))
+		else
+			myServoHorn.addAssemblyStep(2, new Transform().movez(10))
+		//reorent the horn for resin printing
+		myServoHorn.setManufacturing({incoming ->
+			return reverseDHValues(incoming, d, linkIndex).toZMin()
+					.roty(45)
+					.toZMin()
+					.movez(5)
+		})
+		myServoHorn.getStorage().set("bedType", "resin")
+		myServoHorn.setName("Resin Horn "+linkIndex+" "+d.getScriptingName())
+		// attach this links manipulator
+		myServoHorn.setManipulator(dGetLinkObjectManipulator)
+		back.add(myServoHorn)
+		//end horn link
+		if(linkIndex==2) {
+			// this section is a place holder to visualize the tip of the limb
+			CSG foot = new Sphere(10).toCSG()
+			foot.setManipulator(dGetLinkObjectManipulator)
+			back.add(foot)
+		}
+		back.add(motor)
+		cache.addAll(back)
+		return back;
+	}
+
+	@Override
+	public ArrayList<CSG> generateBody(MobileBase arg0) {
+		cache.clear()
+		// TODO Auto-generated method stub
+		ArrayList<CSG> back =[]
+		back.add(new Cube(1).toCSG())
+		for(CSG c:back)
+			c.setManipulator(arg0.getRootListener())
+		for(DHParameterKinematics kin:arg0.getAllDHChains()) {
+			CSG limbRoot =new Cube(1).toCSG()
+			limbRoot.setManipulator(kin.getRootListener())
+			back.add(limbRoot)
+		}
+		cache.addAll(back)
+		return back;
+	}
+
+
+}
+return new cadGenMarcos(resinPrintServoMount,numbers)
+
+
