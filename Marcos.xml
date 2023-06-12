@@ -43,12 +43,12 @@
 		<vitamin>
 			<name>electroMechanical</name>
 			<type>hobbyServo</type>
-			<id>DHV56mg_sub_Micro</id>
+			<id>towerProMG91</id>
 		</vitamin>
 		<vitamin>
 			<name>shaft</name>
 			<type>hobbyServoHorn</type>
-			<id>DHV56mg_sub_Micro_1</id>
+			<id>tproSG90_1</id>
 		</vitamin>
 
 	</vitamins>
@@ -99,12 +99,12 @@
 		<vitamin>
 			<name>electroMechanical</name>
 			<type>hobbyServo</type>
-			<id>DHV56mg_sub_Micro</id>
+			<id>towerProMG91</id>
 		</vitamin>
 		<vitamin>
 			<name>shaft</name>
 			<type>hobbyServoHorn</type>
-			<id>DHV56mg_sub_Micro_1</id>
+			<id>tproSG90_1</id>
 		</vitamin>
 
 	</vitamins>
@@ -155,12 +155,12 @@
 		<vitamin>
 			<name>electroMechanical</name>
 			<type>hobbyServo</type>
-			<id>DHV56mg_sub_Micro</id>
+			<id>towerProMG91</id>
 		</vitamin>
 		<vitamin>
 			<name>shaft</name>
 			<type>hobbyServoHorn</type>
-			<id>DHV56mg_sub_Micro_1</id>
+			<id>tproSG90_1</id>
 		</vitamin>
 
 	</vitamins>
@@ -244,12 +244,12 @@
 		<vitamin>
 			<name>electroMechanical</name>
 			<type>hobbyServo</type>
-			<id>DHV56mg_sub_Micro</id>
+			<id>towerProMG91</id>
 		</vitamin>
 		<vitamin>
 			<name>shaft</name>
 			<type>hobbyServoHorn</type>
-			<id>DHV56mg_sub_Micro_1</id>
+			<id>tproSG90_1</id>
 		</vitamin>
 
 	</vitamins>
@@ -300,12 +300,12 @@
 		<vitamin>
 			<name>electroMechanical</name>
 			<type>hobbyServo</type>
-			<id>DHV56mg_sub_Micro</id>
+			<id>towerProMG91</id>
 		</vitamin>
 		<vitamin>
 			<name>shaft</name>
 			<type>hobbyServoHorn</type>
-			<id>DHV56mg_sub_Micro_1</id>
+			<id>tproSG90_1</id>
 		</vitamin>
 
 	</vitamins>
@@ -356,12 +356,12 @@
 		<vitamin>
 			<name>electroMechanical</name>
 			<type>hobbyServo</type>
-			<id>DHV56mg_sub_Micro</id>
+			<id>towerProMG91</id>
 		</vitamin>
 		<vitamin>
 			<name>shaft</name>
 			<type>hobbyServoHorn</type>
-			<id>DHV56mg_sub_Micro_1</id>
+			<id>tproSG90_1</id>
 		</vitamin>
 
 	</vitamins>
@@ -445,12 +445,12 @@
 		<vitamin>
 			<name>electroMechanical</name>
 			<type>hobbyServo</type>
-			<id>DHV56mg_sub_Micro</id>
+			<id>towerProMG91</id>
 		</vitamin>
 		<vitamin>
 			<name>shaft</name>
 			<type>hobbyServoHorn</type>
-			<id>DHV56mg_sub_Micro_1</id>
+			<id>tproSG90_1</id>
 		</vitamin>
 
 	</vitamins>
@@ -501,12 +501,12 @@
 		<vitamin>
 			<name>electroMechanical</name>
 			<type>hobbyServo</type>
-			<id>DHV56mg_sub_Micro</id>
+			<id>towerProMG91</id>
 		</vitamin>
 		<vitamin>
 			<name>shaft</name>
 			<type>hobbyServoHorn</type>
-			<id>DHV56mg_sub_Micro_1</id>
+			<id>tproSG90_1</id>
 		</vitamin>
 
 	</vitamins>
@@ -557,12 +557,12 @@
 		<vitamin>
 			<name>electroMechanical</name>
 			<type>hobbyServo</type>
-			<id>DHV56mg_sub_Micro</id>
+			<id>towerProMG91</id>
 		</vitamin>
 		<vitamin>
 			<name>shaft</name>
 			<type>hobbyServoHorn</type>
-			<id>DHV56mg_sub_Micro_1</id>
+			<id>tproSG90_1</id>
 		</vitamin>
 
 	</vitamins>
@@ -646,12 +646,12 @@
 		<vitamin>
 			<name>electroMechanical</name>
 			<type>hobbyServo</type>
-			<id>DHV56mg_sub_Micro</id>
+			<id>towerProMG91</id>
 		</vitamin>
 		<vitamin>
 			<name>shaft</name>
 			<type>hobbyServoHorn</type>
-			<id>DHV56mg_sub_Micro_1</id>
+			<id>tproSG90_1</id>
 		</vitamin>
 
 	</vitamins>
@@ -702,12 +702,12 @@
 		<vitamin>
 			<name>electroMechanical</name>
 			<type>hobbyServo</type>
-			<id>DHV56mg_sub_Micro</id>
+			<id>towerProMG91</id>
 		</vitamin>
 		<vitamin>
 			<name>shaft</name>
 			<type>hobbyServoHorn</type>
-			<id>DHV56mg_sub_Micro_1</id>
+			<id>tproSG90_1</id>
 		</vitamin>
 
 	</vitamins>
@@ -758,12 +758,12 @@
 		<vitamin>
 			<name>electroMechanical</name>
 			<type>hobbyServo</type>
-			<id>DHV56mg_sub_Micro</id>
+			<id>towerProMG91</id>
 		</vitamin>
 		<vitamin>
 			<name>shaft</name>
 			<type>hobbyServoHorn</type>
-			<id>DHV56mg_sub_Micro_1</id>
+			<id>tproSG90_1</id>
 		</vitamin>
 
 	</vitamins>
