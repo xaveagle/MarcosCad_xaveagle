@@ -64,17 +64,28 @@ return new ICadGenerator(){
 			
 			@Override
 			public ArrayList<CSG> generateCad(DHParameterKinematics d, int linkIndex) {
+				// read motor typ information out of the link configuration
 				LinkConfiguration conf = d.getLinkConfiguration(linkIndex);
+				// load the vitamin for the servo
 				CSG motor = Vitamins.get(conf.getElectroMechanicalType(),conf.getElectroMechanicalSize())
+				// a list of CSG objects to be rendered
 				ArrayList<CSG> back =[]
+				// get the UI manipulator for the link
 				Affine dGetLinkObjectManipulator = d.getLinkObjectManipulator(linkIndex)
+				// UI manipulator for the root of the limb
 				Affine root = d.getRootListener()
 				if(linkIndex==0) {
+					// the first link motor is located in the body
 					motor.setManipulator(root)
+					
+					motor.addAssemblyStep(1, new Transform().movex(-100))
 				}else {
-					//motor=moveDHValues(motor,d,linkIndex)
+					// the rest of the motors are located in the preior link's kinematic frame 
 					motor.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
+					
+					motor.addAssemblyStep(1, new Transform().movey(-100))
 				}
+				// do not export the motors to STL for manufacturing
 				motor.setManufacturing({return null})
 				
 				if(linkIndex==2) {
