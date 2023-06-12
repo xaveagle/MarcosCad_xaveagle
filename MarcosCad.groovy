@@ -149,7 +149,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				double x = i*(numbers.ServoHornDiameter)
 				double y = j*(numbers.ServoHornDiameter+1.0)
 				try {
-					int index = i+(j*4)
+					int index = i*4+(j)
 					if(index<resin.size()) {
 						println "Adding resin horn to resin bed "+index
 						CSG part =resin[index].prepForManufacturing()
