@@ -13,6 +13,10 @@ import eu.mihosoft.vrl.v3d.PrepForManufacturing
 import eu.mihosoft.vrl.v3d.Sphere
 import eu.mihosoft.vrl.v3d.Transform
 import javafx.scene.transform.Affine
+import eu.mihosoft.vrl.v3d.ChamferedCylinder
+
+
+
 File parametricsCSV = ScriptingEngine.fileFromGit("https://github.com/OperationSmallKat/Marcos.git", "parametrics.csv")
 HashMap<String,Double> numbers;
 BufferedReader reader;
@@ -52,6 +56,8 @@ for(String key :numbers.keySet()) {
 }
 
 
+return new ChamferedCylinder(numbers.ServoHornDiameter,numbers.ServoHornHeight,0.5).toCSG()
+
 
 return new ICadGenerator(){
 			CSG moveDHValues(CSG incoming,DHParameterKinematics d, int linkIndex ){
@@ -68,6 +74,9 @@ return new ICadGenerator(){
 				LinkConfiguration conf = d.getLinkConfiguration(linkIndex);
 				// load the vitamin for the servo
 				CSG motor = Vitamins.get(conf.getElectroMechanicalType(),conf.getElectroMechanicalSize())
+				// Is this value actually something in the CSV?
+				double distanceToMotorTop = motor.getMaxZ();
+				
 				// a list of CSG objects to be rendered
 				ArrayList<CSG> back =[]
 				// get the UI manipulator for the link
@@ -77,18 +86,19 @@ return new ICadGenerator(){
 				if(linkIndex==0) {
 					// the first link motor is located in the body
 					motor.setManipulator(root)
-					
+					// pull the limb servos out the top
 					motor.addAssemblyStep(1, new Transform().movex(-100))
 				}else {
 					// the rest of the motors are located in the preior link's kinematic frame 
 					motor.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
-					
+					// pull the link motors out the thin side
 					motor.addAssemblyStep(1, new Transform().movey(-100))
 				}
 				// do not export the motors to STL for manufacturing
 				motor.setManufacturing({return null})
 				
 				if(linkIndex==2) {
+					// this section is a place holder to visualize the tip of the limb
 					CSG foot = new Sphere(10).toCSG()
 					foot.setManipulator(dGetLinkObjectManipulator)
 					back.add(foot)
