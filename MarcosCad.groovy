@@ -9,6 +9,8 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR
 
 import eu.mihosoft.vrl.v3d.CSG
 import eu.mihosoft.vrl.v3d.Cube
+import eu.mihosoft.vrl.v3d.PrepForManufacturing
+import eu.mihosoft.vrl.v3d.Sphere
 import eu.mihosoft.vrl.v3d.Transform
 import javafx.scene.transform.Affine
 File parametricsCSV = ScriptingEngine.fileFromGit("https://github.com/OperationSmallKat/Marcos.git", "parametrics.csv")
@@ -57,6 +59,9 @@ return new ICadGenerator(){
 				Transform move = com.neuronrobotics.bowlerstudio.physics.TransformFactory.nrToCSG(step)
 				return incoming.transformed(move)
 			}
+			
+			
+			
 			@Override
 			public ArrayList<CSG> generateCad(DHParameterKinematics d, int linkIndex) {
 				LinkConfiguration conf = d.getLinkConfiguration(linkIndex);
@@ -67,11 +72,16 @@ return new ICadGenerator(){
 				if(linkIndex==0) {
 					motor.setManipulator(root)
 				}else {
-					motor=moveDHValues(motor.rotz(90),d,linkIndex)
-					motor.setManipulator(dGetLinkObjectManipulator)
+					//motor=moveDHValues(motor,d,linkIndex)
+					motor.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
 				}
-
-
+				motor.setManufacturing({return null})
+				
+				if(linkIndex==2) {
+					CSG foot = new Sphere(10).toCSG()
+					foot.setManipulator(dGetLinkObjectManipulator)
+					back.add(foot)
+				}
 				back.add(motor)
 				return back;
 			}
