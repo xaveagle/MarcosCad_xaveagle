@@ -14,6 +14,7 @@ import eu.mihosoft.vrl.v3d.Cylinder
 import eu.mihosoft.vrl.v3d.PrepForManufacturing
 import eu.mihosoft.vrl.v3d.Sphere
 import eu.mihosoft.vrl.v3d.Transform
+import eu.mihosoft.vrl.v3d.parametrics.LengthParameter
 import javafx.scene.paint.Color
 import javafx.scene.transform.Affine
 import eu.mihosoft.vrl.v3d.ChamferedCylinder
@@ -110,6 +111,8 @@ CSG resinPrintServoMount=cutcore.difference(spline)
 class cadGenMarcos implements ICadGenerator,IgenerateBed{
 	CSG resinPrintServoMount
 	HashMap<String,Double> numbers
+	LengthParameter tailLength		= new LengthParameter("Cable Cut Out Length",30,[500,0.01])
+	
 	public cadGenMarcos(CSG res,HashMap<String,Double> n) {
 		resinPrintServoMount=res
 		numbers=n
@@ -173,6 +176,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 
 	@Override
 	public ArrayList<CSG> generateCad(DHParameterKinematics d, int linkIndex) {
+
 		// chaeck to see if this is the left side
 		boolean left=false;
 		boolean front=false;
@@ -182,15 +186,21 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		if(d.getRobotToFiducialTransform().getX()>0) {
 			front=true;
 		}
+		TransformNR dGetRobotToFiducialTransform = d.getRobotToFiducialTransform()
+		dGetRobotToFiducialTransform.setY(numbers.BodyServoCenterWidth/2.0*(left?1.0:-1.0))
+		dGetRobotToFiducialTransform.setX(numbers.BodyServoCenterLength/2.0*(front?1.0:-1.0))
+		
+		d.setRobotToFiducialTransform(dGetRobotToFiducialTransform)
 		// read motor typ information out of the link configuration
 		LinkConfiguration conf = d.getLinkConfiguration(linkIndex);
 		// load the vitamin for the servo
+		tailLength.setMM(0.1);
 		CSG motor = Vitamins.get(conf.getElectroMechanicalType(),conf.getElectroMechanicalSize())
 					.toZMax()
-					.movez(numbers.JointSpacing/2.0)
+					.movez(numbers.JointSpacing/2.0+numbers.LooseTolerance)
 		// Is this value actually something in the CSV?
 		double distanceToMotorTop = motor.getMaxZ();
-		
+		println "Center to horn distance "+distanceToMotorTop
 		// a list of CSG objects to be rendered
 		ArrayList<CSG> back =[]
 		// get the UI manipulator for the link
@@ -257,9 +267,18 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 	@Override
 	public ArrayList<CSG> generateBody(MobileBase arg0) {
 		cache.clear()
-		// TODO Auto-generated method stub
-		ArrayList<CSG> back =[]
-		back.add(new Cube(1).toCSG())
+		DHParameterKinematics d = arg0.getLegs().get(0);
+		
+		TransformNR dGetRobotToFiducialTransform = d.getRobotToFiducialTransform()
+		double zCenterLine = dGetRobotToFiducialTransform.getZ()+numbers.ServoThickness/2.0
+
+		CSG body  = Vitamins.get(ScriptingEngine.fileFromGit(
+			"https://github.com/OperationSmallKat/Marcos.git",
+			"Body.stl")).movez(zCenterLine);
+		CSG bodyCOver  = Vitamins.get(ScriptingEngine.fileFromGit(
+			"https://github.com/OperationSmallKat/Marcos.git",
+			"BodyCover.stl")).movez(zCenterLine);
+		ArrayList<CSG> back =[body,bodyCOver]
 		for(CSG c:back)
 			c.setManipulator(arg0.getRootListener())
 		for(DHParameterKinematics kin:arg0.getAllDHChains()) {
