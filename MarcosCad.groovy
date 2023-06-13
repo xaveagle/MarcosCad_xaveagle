@@ -322,6 +322,15 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		CSG bodyCOver  = Vitamins.get(ScriptingEngine.fileFromGit(
 				"https://github.com/OperationSmallKat/Marcos.git",
 				"BodyCover.stl")).movez(zCenterLine);
+		CSG topCOver  = Vitamins.get(ScriptingEngine.fileFromGit(
+				"https://github.com/OperationSmallKat/Marcos.git",
+				"BodyServoCoverTop.stl")).movez(zCenterLine);
+		CSG BottomCover  = Vitamins.get(ScriptingEngine.fileFromGit(
+				"https://github.com/OperationSmallKat/Marcos.git",
+				"BodyCoverBottom.stl")).movez(zCenterLine);
+		
+			
+		
 		bodyCOver.setName("BodyCover")
 		body.setName("Body")
 		body.setManufacturing({ incoming ->
@@ -331,7 +340,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			return incoming.toZMin().toXMin().toYMin().movey(body.getTotalY()+1)
 		})
 
-		ArrayList<CSG> back =[body, bodyCOver]
+		ArrayList<CSG> back =[body, bodyCOver,topCOver,BottomCover]
 		for(CSG c:back) {
 			c.setManipulator(arg0.getRootListener())
 			c.getStorage().set("bedType", "ff-One")
