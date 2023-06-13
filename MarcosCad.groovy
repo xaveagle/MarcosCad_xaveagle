@@ -265,15 +265,6 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		if(d.getRobotToFiducialTransform().getX()>0) {
 			front=true;
 		}
-		TransformNR dGetRobotToFiducialTransform = d.getRobotToFiducialTransform()
-		if(!isDummyGearWrist) {
-			dGetRobotToFiducialTransform.setY(numbers.BodyServoCenterWidth/2.0*(left?1.0:-1.0))
-			dGetRobotToFiducialTransform.setX(numbers.BodyServoCenterLength/2.0*(front?1.0:-1.0))
-		}else {
-			dGetRobotToFiducialTransform.setY((numbers.BodyServoCenterWidth/2.0-6.5)*(left?1.0:-1.0))
-			dGetRobotToFiducialTransform.setX((numbers.BodyServoCenterLength/2.0+7.5)*(front?1.0:-1.0))
-		}
-		d.setRobotToFiducialTransform(dGetRobotToFiducialTransform)
 		// read motor typ information out of the link configuration
 		LinkConfiguration conf = d.getLinkConfiguration(linkIndex);
 		// load the vitamin for the servo
@@ -357,8 +348,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		cache.clear()
 		DHParameterKinematics dh = arg0.getLegs().get(0);
 
-		TransformNR dGetRobotToFiducialTransform = dh.getRobotToFiducialTransform()
-		double zCenterLine = dGetRobotToFiducialTransform.getZ()+numbers.ServoThickness/2.0
+		double zCenterLine = dh.getRobotToFiducialTransform().getZ()+numbers.ServoThickness/2.0
 
 		CSG body  = Vitamins.get(ScriptingEngine.fileFromGit(
 				"https://github.com/OperationSmallKat/Marcos.git",
@@ -411,6 +401,40 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			bottom.addAssemblyStep(2, new Transform().movez(-60))
 			back.addAll([top, bottom])
 			println "ServoCover's for "+left?"Left":"Right"+front?"Front":"Back"
+		}
+		// Set the location of the limbs based on the CSV in the body loader
+		for(DHParameterKinematics d:arg0.getAllDHChains()) {
+			boolean left=false;
+			boolean front=false;
+			boolean isDummyGearWrist = false;
+			if(d.getScriptingName().startsWith("Dummy")) {
+				isDummyGearWrist=true;
+			}
+			if(d.getRobotToFiducialTransform().getY()>0) {
+				left=true;
+			}
+			if(d.getRobotToFiducialTransform().getX()>0) {
+				front=true;
+			}
+			TransformNR dGetRobotToFiducialTransform = d.getRobotToFiducialTransform()
+			def legTOSHoulderX = 7.5
+			def legTOSHoulderY = 6.5
+			
+			double xval=(numbers.BodyServoCenterLength/2.0+legTOSHoulderX)*(front?1.0:-1.0)
+			if(!isDummyGearWrist) {
+				if(arg0.getLegs().contains(d)) {
+					dGetRobotToFiducialTransform.setY(numbers.BodyServoCenterWidth/2.0*(left?1.0:-1.0))
+					dGetRobotToFiducialTransform.setX(numbers.BodyServoCenterLength/2.0*(front?1.0:-1.0))
+				}
+				if(d.getScriptingName().startsWith("Head")||d.getScriptingName().startsWith("Tail")) {
+					dGetRobotToFiducialTransform.setX(xval)
+				}
+			}else {
+				dGetRobotToFiducialTransform.setY((numbers.BodyServoCenterWidth/2.0-legTOSHoulderY)*(left?1.0:-1.0))
+				dGetRobotToFiducialTransform.setX(xval)
+				
+			}
+			d.setRobotToFiducialTransform(dGetRobotToFiducialTransform)
 		}
 
 		bodyCOver.setName("BodyCover")

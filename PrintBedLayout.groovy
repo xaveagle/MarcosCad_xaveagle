@@ -194,6 +194,7 @@ class PrintBedObject{
 			globalPose.translateY(-maxYTest)
 		if(maxXTest>0)
 			globalPose.translateX(-maxXTest)
+		currentPose=globalPose.copy()
 		println "Update "+name+" to "+((int)globalPose.getX())+" : "+((int)globalPose.getY())
 		Platform.runLater({
 			TransformFactory.nrToAffine(globalPose,manipulator)
