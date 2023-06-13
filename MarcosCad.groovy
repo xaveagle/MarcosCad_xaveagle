@@ -21,6 +21,8 @@ import javafx.scene.transform.Affine
 import eu.mihosoft.vrl.v3d.ChamferedCylinder
 import java.lang.reflect.Type
 
+import org.apache.commons.math3.genetics.GeneticAlgorithm
+
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager
@@ -251,7 +253,9 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 
 	@Override
 	public ArrayList<CSG> generateCad(DHParameterKinematics d, int linkIndex) {
-
+		if(d.getScriptingName().startsWith("Head")||d.getScriptingName().startsWith("Tail")) {
+			return generateCadHeadTail(d, linkIndex)
+		}
 		// chaeck to see if this is the left side
 		boolean left=false;
 		boolean front=false;
@@ -342,7 +346,28 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		cache.addAll(back)
 		return back;
 	}
+	public ArrayList<CSG> generateCadHeadTail(DHParameterKinematics d, int linkIndex) {
+		// TODO Auto-generated method stub
+		ArrayList<CSG> back =[]
+		if(linkIndex==0) {
+			CSG wrist= Vitamins.get(ScriptingEngine.fileFromGit(
+					"https://github.com/OperationSmallKat/Marcos.git",
+					"WristCenter.stl"))
+					.rotz(90)
+					.rotx(90)
+			wrist.setName("WristCenter"+d.getScriptingName())
+			wrist.setManufacturing({ incoming ->
+				return incoming.roty(90).toZMin().toXMin().toYMin()
+			})
+			wrist.getStorage().set("bedType", "ff-One")
+			back.add(wrist)
+		}
 
+		for(CSG c:back)
+			c.setManipulator(d.getLinkObjectManipulator(linkIndex))
+		cache.addAll(back)
+		return back;
+	}
 	@Override
 	public ArrayList<CSG> generateBody(MobileBase arg0) {
 		cache.clear()
@@ -419,7 +444,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			TransformNR dGetRobotToFiducialTransform = d.getRobotToFiducialTransform()
 			def legTOSHoulderX = 7.5
 			def legTOSHoulderY = 6.5
-			
+
 			double xval=(numbers.BodyServoCenterLength/2.0+legTOSHoulderX)*(front?1.0:-1.0)
 			if(!isDummyGearWrist) {
 				if(arg0.getLegs().contains(d)) {
@@ -432,7 +457,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			}else {
 				dGetRobotToFiducialTransform.setY((numbers.BodyServoCenterWidth/2.0-legTOSHoulderY)*(left?1.0:-1.0))
 				dGetRobotToFiducialTransform.setX(xval)
-				
+
 			}
 			d.setRobotToFiducialTransform(dGetRobotToFiducialTransform)
 		}
