@@ -301,7 +301,7 @@ for(CSG c:cache) {
 }
 int bedIndex=0;
 HashMap<String,PrintBedObject> pbo = new HashMap<>()
-for(String s:bedNames.keySet()) {
+for(String s:bedNames.keySet().stream().sorted()) {
 	double bedYLim=bedY*bedIndex+bedIndex
 	CSG bedRep=new Cube(bedX,bedY,1).toCSG().toZMax()
 			.toXMin()
