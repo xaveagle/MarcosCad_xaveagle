@@ -163,42 +163,47 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		ArrayList<CSG> three = []
 		for(CSG bit :cache) {
 			def bitGetStorageGetValue = bit.getStorage().getValue("bedType")
-			String name=bit.getName()
-			File source=new File(ScriptingEngine.getRepositoryCloneDirectory("https://github.com/OperationSmallKat/Marcos.git").getAbsolutePath()+"/print_bed_location_"+name+".json")
-			if(source.exists()) {
-				//println "Loading location from "+source.getAbsolutePath()
-				Type TT_mapStringString = new TypeToken<ArrayList<TransformNR>>() {
-						}.getType();
-	
-				ArrayList<TransformNR> l = gson.fromJson(source.text, TT_mapStringString);
-				if(l!=null&& l.size()>0) {
-					TransformNR location=l.get(0)
-					if(location!=null) {
-						Transform csfMove = TransformFactory.nrToCSG(location)
-						bit=bit.transformed(csfMove)
+			if(bitGetStorageGetValue.present) {
+				bit=bit.prepForManufacturing()
+				String name=bit.getName()
+				File source=new File(ScriptingEngine.getRepositoryCloneDirectory("https://github.com/OperationSmallKat/Marcos.git").getAbsolutePath()+"/print_bed_location_"+name+".json")
+				if(source.exists()) {
+					//println "Loading location from "+source.getAbsolutePath()
+					Type TT_mapStringString = new TypeToken<ArrayList<TransformNR>>() {
+							}.getType();
+		
+					ArrayList<TransformNR> l = gson.fromJson(source.text, TT_mapStringString);
+					if(l!=null&& l.size()>0) {
+						TransformNR location=l.get(0)
+						if(location!=null) {
+							Transform csfMove = TransformFactory.nrToCSG(location)
+							bit=bit.transformed(csfMove)
+						}
 					}
 				}
-			}
-			
-			if(bitGetStorageGetValue.present) {
-				if(bitGetStorageGetValue.get().toString().contentEquals("resin")) {
+				def bitGetStorageGetValueGetToString = bitGetStorageGetValue.get().toString()
+				if(bitGetStorageGetValueGetToString.contentEquals("resin")) {
 					resin.add(bit)
 				}
-				if(bitGetStorageGetValue.get().toString().contentEquals("ff-One")) {
+				else if(bitGetStorageGetValueGetToString.contentEquals("ff-One")) {
 					one.add(bit)
 				}
-				if(bitGetStorageGetValue.get().toString().contentEquals("ff-Two")) {
+				else if(bitGetStorageGetValueGetToString.contentEquals("ff-Two")) {
 					two.add(bit)
 				}
-				if(bitGetStorageGetValue.get().toString().contentEquals("ff-Three")) {
+				else if(bitGetStorageGetValueGetToString.contentEquals("ff-Three")) {
 					three.add(bit)
+				}else {
+					println "unknown bed type! "+bitGetStorageGetValueGetToString
 				}
+				println "Adding part to Print bed "+bitGetStorageGetValueGetToString+" "+name
 			}
+			else
+				println "Rejecting "+bit.getName()
 		}
 
 		CSG bedThree=null
 		for(CSG p:one) {
-			p=p.prepForManufacturing()
 			if(bedThree==null)
 				bedThree=p
 			else {
@@ -208,7 +213,6 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		bedThree.setName("FF-Bed-Three")
 		CSG bedTwo=null
 		for(CSG p:one) {
-			p=p.prepForManufacturing()
 			if(bedTwo==null)
 				bedTwo=p
 			else {
@@ -218,7 +222,6 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		bedTwo.setName("FF-Bed-Two")		
 		CSG bedOne=null
 		for(CSG p:one) {
-			p=p.prepForManufacturing()
 			if(bedOne==null)
 				bedOne=p
 			else {
@@ -235,7 +238,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 					int index = i*4+(j)
 					if(index<resin.size()) {
 						println "Adding resin horn to resin bed "+index
-						CSG part =resin[index].prepForManufacturing()
+						CSG part =resin[index]
 						CSG moved = part.movex(x).movey(y)
 						if(resinBed==null)
 							resinBed=moved
@@ -338,8 +341,11 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			// this section is a place holder to visualize the tip of the limb
 			CSG foot = new Sphere(10).toCSG()
 			foot.setManipulator(dGetLinkObjectManipulator)
+			foot.setManufacturing({return null})
+			foot.setName("Dummy Foot")
 			back.add(foot)
 		}
+		motor.setName(conf.getElectroMechanicalSize())
 		back.add(motor)
 		cache.addAll(back)
 		return back;
