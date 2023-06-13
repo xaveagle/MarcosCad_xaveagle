@@ -47,7 +47,7 @@ class PrintBedObject{
 		this.yMin =  yMin;
 		source=new File(ScriptingEngine.getRepositoryCloneDirectory("https://github.com/OperationSmallKat/Marcos.git").getAbsolutePath()+"/print_bed_location_"+name+".json")
 		if(source.exists()) {
-			println "Loading location from "+source.getAbsolutePath()
+			//println "Loading location from "+source.getAbsolutePath()
 			Type TT_mapStringString = new TypeToken<ArrayList<TransformNR>>() {
 					}.getType();
 
