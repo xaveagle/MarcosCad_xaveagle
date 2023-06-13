@@ -1,3 +1,4 @@
+import com.google.gson.reflect.TypeToken
 import com.neuronrobotics.bowlerstudio.creature.ICadGenerator
 import com.neuronrobotics.bowlerstudio.creature.IgenerateBed
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine
@@ -18,7 +19,25 @@ import eu.mihosoft.vrl.v3d.parametrics.LengthParameter
 import javafx.scene.paint.Color
 import javafx.scene.transform.Affine
 import eu.mihosoft.vrl.v3d.ChamferedCylinder
+import java.lang.reflect.Type
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
+import com.neuronrobotics.bowlerstudio.BowlerStudioController
+import com.neuronrobotics.bowlerstudio.creature.IgenerateBed
+import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager
+import com.neuronrobotics.bowlerstudio.physics.TransformFactory
+import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine
+import com.neuronrobotics.sdk.addons.kinematics.MobileBase
+import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR
+import com.neuronrobotics.sdk.common.DeviceManager
+
+import eu.mihosoft.vrl.v3d.CSG
+import eu.mihosoft.vrl.v3d.Cube
+import javafx.application.Platform
+import javafx.scene.paint.Color
+import javafx.scene.transform.Affine
 CSG ChamferedCylinder(double r, double h, double chamferHeight) {
 	CSG cube1 = new Cylinder(r - chamferHeight,r - chamferHeight, h,40).toCSG();
 	CSG cube2 = new Cylinder(r,r, h - chamferHeight * 2,40).toCSG().movez(chamferHeight);
@@ -112,7 +131,8 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 	CSG resinPrintServoMount
 	HashMap<String,Double> numbers
 	LengthParameter tailLength		= new LengthParameter("Cable Cut Out Length",30,[500, 0.01])
-
+	Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+	
 	public cadGenMarcos(CSG res,HashMap<String,Double> n) {
 		resinPrintServoMount=res
 		numbers=n
@@ -143,6 +163,22 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		ArrayList<CSG> three = []
 		for(CSG bit :cache) {
 			def bitGetStorageGetValue = bit.getStorage().getValue("bedType")
+			File source=new File(ScriptingEngine.getRepositoryCloneDirectory("https://github.com/OperationSmallKat/Marcos.git").getAbsolutePath()+"/print_bed_location_"+name+".json")
+			if(source.exists()) {
+				//println "Loading location from "+source.getAbsolutePath()
+				Type TT_mapStringString = new TypeToken<ArrayList<TransformNR>>() {
+						}.getType();
+	
+				ArrayList<TransformNR> l = gson.fromJson(source.text, TT_mapStringString);
+				if(l!=null&& l.size()>0) {
+					TransformNR location=l.get(0)
+					if(location!=null) {
+						Transform csfMove = TransformFactory.nrToCSG(location)
+						bit=bit.transformed(csfMove)
+					}
+				}
+			}
+			
 			if(bitGetStorageGetValue.present) {
 				if(bitGetStorageGetValue.get().toString().contentEquals("resin")) {
 					resin.add(bit)
