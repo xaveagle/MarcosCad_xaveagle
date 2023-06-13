@@ -111,8 +111,8 @@ CSG resinPrintServoMount=cutcore.difference(spline)
 class cadGenMarcos implements ICadGenerator,IgenerateBed{
 	CSG resinPrintServoMount
 	HashMap<String,Double> numbers
-	LengthParameter tailLength		= new LengthParameter("Cable Cut Out Length",30,[500,0.01])
-	
+	LengthParameter tailLength		= new LengthParameter("Cable Cut Out Length",30,[500, 0.01])
+
 	public cadGenMarcos(CSG res,HashMap<String,Double> n) {
 		resinPrintServoMount=res
 		numbers=n
@@ -138,14 +138,57 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 	public ArrayList<CSG> arrangeBed(MobileBase base){
 		println "Generating Marcos Print Bed"
 		ArrayList<CSG> resin = []
+		ArrayList<CSG> one = []
+		ArrayList<CSG> two = []
+		ArrayList<CSG> three = []
 		for(CSG bit :cache) {
 			def bitGetStorageGetValue = bit.getStorage().getValue("bedType")
 			if(bitGetStorageGetValue.present) {
 				if(bitGetStorageGetValue.get().toString().contentEquals("resin")) {
 					resin.add(bit)
 				}
+				if(bitGetStorageGetValue.get().toString().contentEquals("ff-One")) {
+					one.add(bit)
+				}
+				if(bitGetStorageGetValue.get().toString().contentEquals("ff-Two")) {
+					two.add(bit)
+				}
+				if(bitGetStorageGetValue.get().toString().contentEquals("ff-Three")) {
+					three.add(bit)
+				}
 			}
 		}
+
+		CSG bedThree=null
+		for(CSG p:one) {
+			p=p.prepForManufacturing()
+			if(bedThree==null)
+				bedThree=p
+			else {
+				bedThree=bedThree.dumbUnion(p)
+			}
+		}
+		bedThree.setName("FF-Bed-Three")
+		CSG bedTwo=null
+		for(CSG p:one) {
+			p=p.prepForManufacturing()
+			if(bedTwo==null)
+				bedTwo=p
+			else {
+				bedTwo=bedTwo.dumbUnion(p)
+			}
+		}
+		bedTwo.setName("FF-Bed-Two")		
+		CSG bedOne=null
+		for(CSG p:one) {
+			p=p.prepForManufacturing()
+			if(bedOne==null)
+				bedOne=p
+			else {
+				bedOne=bedOne.dumbUnion(p)
+			}
+		}
+		bedOne.setName("FF-Bed-One")
 		CSG resinBed=null
 		for(int i=0;i<4;i++) {
 			for (int j=0;j<4;j++) {
@@ -168,9 +211,10 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			}
 		}
 
-		resinBed.setName("Print Bed Resin Printer")
-		
-		return [resinBed]
+		resinBed.setName("Print-Bed-Resin-Printer")
+		resinBed.setColor(Color.GREY)
+
+		return [resinBed, bedOne,bedTwo,bedThree]
 
 	}
 
@@ -189,15 +233,15 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		TransformNR dGetRobotToFiducialTransform = d.getRobotToFiducialTransform()
 		dGetRobotToFiducialTransform.setY(numbers.BodyServoCenterWidth/2.0*(left?1.0:-1.0))
 		dGetRobotToFiducialTransform.setX(numbers.BodyServoCenterLength/2.0*(front?1.0:-1.0))
-		
+
 		d.setRobotToFiducialTransform(dGetRobotToFiducialTransform)
 		// read motor typ information out of the link configuration
 		LinkConfiguration conf = d.getLinkConfiguration(linkIndex);
 		// load the vitamin for the servo
 		tailLength.setMM(0.1);
 		CSG motor = Vitamins.get(conf.getElectroMechanicalType(),conf.getElectroMechanicalSize())
-					.toZMax()
-					.movez(numbers.JointSpacing/2.0+numbers.LooseTolerance)
+				.toZMax()
+				.movez(numbers.JointSpacing/2.0+numbers.LooseTolerance)
 		// Is this value actually something in the CSV?
 		double distanceToMotorTop = motor.getMaxZ();
 		println "Center to horn distance "+distanceToMotorTop
@@ -208,7 +252,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		// UI manipulator for the root of the limb
 		Affine root = d.getRootListener()
 
-		
+
 		if(linkIndex==0) {
 			motor=motor.rotz(left?180:0)
 			motor=motor.roty(front?180:0)
@@ -268,19 +312,28 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 	public ArrayList<CSG> generateBody(MobileBase arg0) {
 		cache.clear()
 		DHParameterKinematics d = arg0.getLegs().get(0);
-		
+
 		TransformNR dGetRobotToFiducialTransform = d.getRobotToFiducialTransform()
 		double zCenterLine = dGetRobotToFiducialTransform.getZ()+numbers.ServoThickness/2.0
 
 		CSG body  = Vitamins.get(ScriptingEngine.fileFromGit(
-			"https://github.com/OperationSmallKat/Marcos.git",
-			"Body.stl")).movez(zCenterLine);
+				"https://github.com/OperationSmallKat/Marcos.git",
+				"Body.stl")).movez(zCenterLine);
 		CSG bodyCOver  = Vitamins.get(ScriptingEngine.fileFromGit(
-			"https://github.com/OperationSmallKat/Marcos.git",
-			"BodyCover.stl")).movez(zCenterLine);
-		ArrayList<CSG> back =[body,bodyCOver]
-		for(CSG c:back)
+				"https://github.com/OperationSmallKat/Marcos.git",
+				"BodyCover.stl")).movez(zCenterLine);
+		body.setManufacturing({ incoming ->
+			return incoming.rotx(180).toZMin().toXMin().toYMin()
+		})
+		bodyCOver.setManufacturing({ incoming ->
+			return incoming.toZMin().toXMin().toYMin().movey(body.getTotalY()+1)
+		})
+
+		ArrayList<CSG> back =[body, bodyCOver]
+		for(CSG c:back) {
 			c.setManipulator(arg0.getRootListener())
+			c.getStorage().set("bedType", "ff-One")
+		}
 		for(DHParameterKinematics kin:arg0.getAllDHChains()) {
 			CSG limbRoot =new Cube(1).toCSG()
 			limbRoot.setManipulator(kin.getRootListener())
