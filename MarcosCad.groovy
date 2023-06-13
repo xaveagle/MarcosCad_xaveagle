@@ -37,8 +37,8 @@ double computeGearPitch(double diameterAtCrown,double numberOfTeeth){
 	return ((diameterAtCrown/2)*((360.0)/numberOfTeeth)*Math.PI/180)
 }
 
-
-File parametricsCSV = ScriptingEngine.fileFromGit("https://github.com/OperationSmallKat/Marcos.git", "parametrics.csv")
+url = "https://github.com/OperationSmallKat/Marcos.git"
+File parametricsCSV = ScriptingEngine.fileFromGit(url, "parametrics.csv")
 HashMap<String,Double> numbers;
 BufferedReader reader;
 String code="HashMap<String,Double> numbers = new HashMap<>()\n"
@@ -118,6 +118,7 @@ CSG spline = gears.get(0)
 CSG resinPrintServoMount=cutcore.difference(spline)
 
 class cadGenMarcos implements ICadGenerator,IgenerateBed{
+	String url = "https://github.com/OperationSmallKat/Marcos.git"
 	CSG resinPrintServoMount
 	HashMap<String,Double> numbers
 	LengthParameter tailLength		= new LengthParameter("Cable Cut Out Length",30,[500, 0.01])
@@ -156,7 +157,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			if(bitGetStorageGetValue.present) {
 				bit=bit.prepForManufacturing()
 				String name=bit.getName()
-				File source=new File(ScriptingEngine.getRepositoryCloneDirectory(base.getGitSelfSource()[0]).getAbsolutePath()+"/print_bed_location_"+name+".json")
+				File source=new File(ScriptingEngine.getRepositoryCloneDirectory(url).getAbsolutePath()+"/print_bed_location_"+name+".json")
 				if(source.exists()) {
 					//println "Loading location from "+source.getAbsolutePath()
 					Type TT_mapStringString = new TypeToken<ArrayList<TransformNR>>() {
