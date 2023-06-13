@@ -173,25 +173,40 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 
 	@Override
 	public ArrayList<CSG> generateCad(DHParameterKinematics d, int linkIndex) {
+		// chaeck to see if this is the left side
+		boolean left=false;
+		boolean front=false;
+		if(d.getRobotToFiducialTransform().getY()>0) {
+			left=true;
+		}
+		if(d.getRobotToFiducialTransform().getX()>0) {
+			front=true;
+		}
 		// read motor typ information out of the link configuration
 		LinkConfiguration conf = d.getLinkConfiguration(linkIndex);
 		// load the vitamin for the servo
 		CSG motor = Vitamins.get(conf.getElectroMechanicalType(),conf.getElectroMechanicalSize())
 		// Is this value actually something in the CSV?
 		double distanceToMotorTop = motor.getMaxZ();
-
+		
 		// a list of CSG objects to be rendered
 		ArrayList<CSG> back =[]
 		// get the UI manipulator for the link
 		Affine dGetLinkObjectManipulator = d.getLinkObjectManipulator(linkIndex)
 		// UI manipulator for the root of the limb
 		Affine root = d.getRootListener()
+
+		
 		if(linkIndex==0) {
+			motor=motor.rotz(left?180:0)
+			motor=motor.roty(front?180:0)
 			// the first link motor is located in the body
 			motor.setManipulator(root)
 			// pull the limb servos out the top
 			motor.addAssemblyStep(1, new Transform().movex(-100))
 		}else {
+			motor=motor.roty(left?180:0)
+			
 			// the rest of the motors are located in the preior link's kinematic frame
 			motor.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
 			// pull the link motors out the thin side
@@ -203,7 +218,12 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		//Start the horn link
 		// move the horn from tip of the link space, to the Motor of the last link space
 		// note the hore is moved to the centerline distance value before the transform to link space
-		CSG myServoHorn = moveDHValues(resinPrintServoMount.movez(distanceToMotorTop),d,linkIndex)
+		CSG movedHorn = resinPrintServoMount.movez(distanceToMotorTop)
+		if(linkIndex==0)
+			movedHorn=movedHorn.roty(front?180:0)
+		else
+			movedHorn=movedHorn.roty(left?180:0)
+		CSG myServoHorn = moveDHValues(movedHorn,d,linkIndex)
 		if(linkIndex==0)
 			myServoHorn.addAssemblyStep(2, new Transform().movey(-10))
 		else
