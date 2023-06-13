@@ -123,7 +123,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 	HashMap<String,Double> numbers
 	LengthParameter tailLength		= new LengthParameter("Cable Cut Out Length",30,[500, 0.01])
 	Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
-	
+
 	public cadGenMarcos(CSG res,HashMap<String,Double> n) {
 		resinPrintServoMount=res
 		numbers=n
@@ -162,7 +162,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 					//println "Loading location from "+source.getAbsolutePath()
 					Type TT_mapStringString = new TypeToken<ArrayList<TransformNR>>() {
 							}.getType();
-		
+
 					ArrayList<TransformNR> l = gson.fromJson(source.text, TT_mapStringString);
 					if(l!=null&& l.size()>0) {
 						TransformNR location=l.get(0)
@@ -194,7 +194,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		}
 
 		CSG bedThree=toBed(three ,"FF-Bed-Three")
-		CSG bedTwo=toBed(two ,"FF-Bed-Two")	
+		CSG bedTwo=toBed(two ,"FF-Bed-Two")
 		CSG bedOne=toBed(one ,"FF-Bed-One")
 		CSG resinBed=null
 		for(int i=0;i<4;i++) {
@@ -221,10 +221,15 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		resinBed.setName("Print-Bed-Resin-Printer")
 		resinBed.setColor(Color.GREY)
 
-		return [resinBed, bedOne,bedTwo,bedThree]
+		return [
+			resinBed,
+			bedOne,
+			bedTwo,
+			bedThree
+		]
 
 	}
-	
+
 	private CSG toBed(ArrayList<CSG> parts, String name) {
 		CSG bedOne=null
 		for(CSG p:parts) {
@@ -240,7 +245,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			bedOne = new Cube().toCSG()
 			bedOne.setManufacturing({return null})
 		}
-			
+
 		return bedOne
 	}
 
@@ -250,6 +255,10 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		// chaeck to see if this is the left side
 		boolean left=false;
 		boolean front=false;
+		boolean isDummyGearWrist = false;
+		if(d.getScriptingName().startsWith("Dummy")) {
+			isDummyGearWrist=true;
+		}
 		if(d.getRobotToFiducialTransform().getY()>0) {
 			left=true;
 		}
@@ -257,9 +266,13 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			front=true;
 		}
 		TransformNR dGetRobotToFiducialTransform = d.getRobotToFiducialTransform()
-		dGetRobotToFiducialTransform.setY(numbers.BodyServoCenterWidth/2.0*(left?1.0:-1.0))
-		dGetRobotToFiducialTransform.setX(numbers.BodyServoCenterLength/2.0*(front?1.0:-1.0))
-
+		if(!isDummyGearWrist) {
+			dGetRobotToFiducialTransform.setY(numbers.BodyServoCenterWidth/2.0*(left?1.0:-1.0))
+			dGetRobotToFiducialTransform.setX(numbers.BodyServoCenterLength/2.0*(front?1.0:-1.0))
+		}else {
+			dGetRobotToFiducialTransform.setY((numbers.BodyServoCenterWidth/2.0-6.5)*(left?1.0:-1.0))
+			dGetRobotToFiducialTransform.setX((numbers.BodyServoCenterLength/2.0+7.5)*(front?1.0:-1.0))
+		}
 		d.setRobotToFiducialTransform(dGetRobotToFiducialTransform)
 		// read motor typ information out of the link configuration
 		LinkConfiguration conf = d.getLinkConfiguration(linkIndex);
@@ -285,14 +298,14 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			// the first link motor is located in the body
 			motor.setManipulator(root)
 			// pull the limb servos out the top
-			motor.addAssemblyStep(1, new Transform().movex(30))
+			motor.addAssemblyStep(1, new Transform().movex(isDummyGearWrist?-30:30))
 		}else {
 			motor=motor.roty(left?180:0)
 			motor=motor.rotz(90)
 			// the rest of the motors are located in the preior link's kinematic frame
 			motor.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
 			// pull the link motors out the thin side
-			
+
 			motor.addAssemblyStep(4, new Transform().movez(left?-30:30))
 			motor.addAssemblyStep(5, new Transform().movex(-30))
 		}
@@ -396,10 +409,10 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			bottom.getStorage().set("bedType", "ff-Two")
 			top.addAssemblyStep(2, new Transform().movez(60))
 			bottom.addAssemblyStep(2, new Transform().movez(-60))
-			back.addAll([top,bottom])
+			back.addAll([top, bottom])
 			println "ServoCover's for "+left?"Left":"Right"+front?"Front":"Back"
-		}	
-		
+		}
+
 		bodyCOver.setName("BodyCover")
 		bodyCOver.addAssemblyStep(2, new Transform().movez(80))
 		body.setName("Body")
@@ -410,15 +423,15 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			return incoming.toZMin().toXMin().toYMin().movey(body.getTotalY()+1)
 		})
 
-		
+
 		for(CSG c:back) {
 			c.setManipulator(arg0.getRootListener())
 		}
-//		for(DHParameterKinematics kin:arg0.getAllDHChains()) {
-//			CSG limbRoot =new Cube(1).toCSG()
-//			limbRoot.setManipulator(kin.getRootListener())
-//			back.add(limbRoot)
-//		}
+		//		for(DHParameterKinematics kin:arg0.getAllDHChains()) {
+		//			CSG limbRoot =new Cube(1).toCSG()
+		//			limbRoot.setManipulator(kin.getRootListener())
+		//			back.add(limbRoot)
+		//		}
 		cache.addAll(back)
 		return back;
 	}
