@@ -13,11 +13,15 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR
 import com.neuronrobotics.sdk.common.DeviceManager
 
 import eu.mihosoft.vrl.v3d.CSG
+import eu.mihosoft.vrl.v3d.Cube
 import javafx.application.Platform
+import javafx.scene.paint.Color
 import javafx.scene.transform.Affine
 
 double bedX=260
 double bedY=260
+
+def colors =[Color.RED,Color.GREY,Color.BLUE,Color.GREEN]
 
 class PrintBedObject{
 
@@ -43,16 +47,17 @@ class PrintBedObject{
 		this.yMin =  yMin;
 		source=new File(ScriptingEngine.getRepositoryCloneDirectory("https://github.com/OperationSmallKat/Marcos.git").getAbsolutePath()+"/print_bed_location_"+name+".json")
 		if(source.exists()) {
+			println "Loading location from "+source.getAbsolutePath()
 			Type TT_mapStringString = new TypeToken<ArrayList<TransformNR>>() {
 					}.getType();
 
 			ArrayList<TransformNR> l = gson.fromJson(source.text, TT_mapStringString);
 			if(l!=null&& l.size()>0)
 				location=l.get(0)
-		}else{
-			save()
 		}
-		manipulator=part.getManipulator()
+		part.setManipulator(manipulator)
+		save()
+		BowlerStudioController.addCsg(part)
 	}
 	public void save() {
 		update()
@@ -71,6 +76,7 @@ class PrintBedObject{
 			location.translateY(-maxYTest)
 		if(maxXTest>0)
 			location.translateX(-maxXTest)
+		println "Update "+name+" to "+((int)location.getX())+" : "+((int)location.getY())
 		Platform.runLater({
 			TransformFactory.nrToAffine(location,manipulator)
 		})
@@ -97,8 +103,6 @@ for(CSG c:cache) {
 			bedNames.put(bedName, new ArrayList<>())
 		CSG tmp = c.prepForManufacturing()
 		mapOfNameToMFGPart.put(name, tmp)
-		tmp.setManipulator(new Affine())
-		BowlerStudioController.addCsg(tmp)
 		bedNames.get(bedName).add(tmp)
 	}
 }
@@ -106,6 +110,13 @@ int bedIndex=0;
 HashMap<String,PrintBedObject> pbo = new HashMap<>()
 for(String s:bedNames.keySet()) {
 	double bedYLim=bedY*bedIndex+bedIndex
+	CSG bedRep=new Cube(bedX,bedY,1).toCSG().toZMax()
+					.toXMin()
+					.toYMin()
+					.movey(bedYLim)
+	bedRep.setColor(colors[bedIndex])
+	BowlerStudioController.addCsg(bedRep)
+	
 	for(CSG c:bedNames.get(s)) {
 		PrintBedObject obj =new PrintBedObject(c.getName(),c,bedX,0,bedYLim+bedY,bedYLim)
 		pbo.put(s, obj)

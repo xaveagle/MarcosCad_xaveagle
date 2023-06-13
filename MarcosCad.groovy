@@ -351,8 +351,10 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				top=top.mirrory()
 				bottom=bottom.mirrory()
 			}
-			top.setName("ServoCoverTop"+left?"Left":"Right"+front?"Front":"Back");
-			bottom.setName("ServoCoverBottom"+left?"Left":"Right"+front?"Front":"Back");
+			def local = "ServoCoverTop"+(left?"Left":"Right")+(front?"Front":"Back")
+			top.setName(local);
+			def local2 = "ServoCoverBottom"+(left?"Left":"Right")+(front?"Front":"Back")
+			bottom.setName(local2);
 			top.setManufacturing({ incoming ->
 				return incoming.toZMin().toXMin().toYMin()
 			})
