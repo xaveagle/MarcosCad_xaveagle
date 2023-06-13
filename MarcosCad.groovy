@@ -166,7 +166,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			if(bitGetStorageGetValue.present) {
 				bit=bit.prepForManufacturing()
 				String name=bit.getName()
-				File source=new File(ScriptingEngine.getRepositoryCloneDirectory("https://github.com/OperationSmallKat/Marcos.git").getAbsolutePath()+"/print_bed_location_"+name+".json")
+				File source=new File(ScriptingEngine.getRepositoryCloneDirectory(base.getGitSelfSource()[0]).getAbsolutePath()+"/print_bed_location_"+name+".json")
 				if(source.exists()) {
 					//println "Loading location from "+source.getAbsolutePath()
 					Type TT_mapStringString = new TypeToken<ArrayList<TransformNR>>() {
@@ -202,33 +202,9 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				println "Rejecting "+bit.getName()
 		}
 
-		CSG bedThree=null
-		for(CSG p:one) {
-			if(bedThree==null)
-				bedThree=p
-			else {
-				bedThree=bedThree.dumbUnion(p)
-			}
-		}
-		bedThree.setName("FF-Bed-Three")
-		CSG bedTwo=null
-		for(CSG p:one) {
-			if(bedTwo==null)
-				bedTwo=p
-			else {
-				bedTwo=bedTwo.dumbUnion(p)
-			}
-		}
-		bedTwo.setName("FF-Bed-Two")		
-		CSG bedOne=null
-		for(CSG p:one) {
-			if(bedOne==null)
-				bedOne=p
-			else {
-				bedOne=bedOne.dumbUnion(p)
-			}
-		}
-		bedOne.setName("FF-Bed-One")
+		CSG bedThree=toBed(three ,"FF-Bed-Three")
+		CSG bedTwo=toBed(two ,"FF-Bed-Two")	
+		CSG bedOne=toBed(one ,"FF-Bed-One")
 		CSG resinBed=null
 		for(int i=0;i<4;i++) {
 			for (int j=0;j<4;j++) {
@@ -256,6 +232,25 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 
 		return [resinBed, bedOne,bedTwo,bedThree]
 
+	}
+	
+	private CSG toBed(ArrayList<CSG> parts, String name) {
+		CSG bedOne=null
+		for(CSG p:parts) {
+			if(bedOne==null)
+				bedOne=p
+			else {
+				bedOne=bedOne.dumbUnion(p)
+			}
+		}
+		if(bedOne!=null)
+			bedOne.setName(name)
+		else {
+			bedOne = new Cube().toCSG()
+			bedOne.setManufacturing({return null})
+		}
+			
+		return bedOne
 	}
 
 	@Override
