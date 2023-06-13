@@ -186,6 +186,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		LinkConfiguration conf = d.getLinkConfiguration(linkIndex);
 		// load the vitamin for the servo
 		CSG motor = Vitamins.get(conf.getElectroMechanicalType(),conf.getElectroMechanicalSize())
+					.toZMax()
 		// Is this value actually something in the CSV?
 		double distanceToMotorTop = motor.getMaxZ();
 		
@@ -206,7 +207,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			motor.addAssemblyStep(1, new Transform().movex(-100))
 		}else {
 			motor=motor.roty(left?180:0)
-			
+			motor=motor.rotz(90)
 			// the rest of the motors are located in the preior link's kinematic frame
 			motor.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
 			// pull the link motors out the thin side
