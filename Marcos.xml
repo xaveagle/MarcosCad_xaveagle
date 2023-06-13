@@ -829,7 +829,7 @@
 	<name>basePan</name>
 	<deviceName>midnight</deviceName>
 	<type>hidfast</type>
-	<index>10</index>
+	<index>20</index>
 	<scale>0.574</scale>
 	<upperLimit>123.0</upperLimit>
 	<lowerLimit>1.0</lowerLimit>
@@ -918,7 +918,7 @@
 	<name>basePan</name>
 	<deviceName>midnight</deviceName>
 	<type>hidfast</type>
-	<index>2</index>
+	<index>19</index>
 	<scale>-0.512698413</scale>
 	<upperLimit>126.0</upperLimit>
 	<lowerLimit>1.0</lowerLimit>
@@ -1007,7 +1007,7 @@
 	<name>basePan</name>
 	<deviceName>midnight</deviceName>
 	<type>hidfast</type>
-	<index>5</index>
+	<index>18</index>
 	<scale>-0.512698413</scale>
 	<upperLimit>180.0</upperLimit>
 	<lowerLimit>52.0</lowerLimit>
@@ -1096,7 +1096,7 @@
 	<name>basePan</name>
 	<deviceName>midnight</deviceName>
 	<type>hidfast</type>
-	<index>13</index>
+	<index>17</index>
 	<scale>0.574</scale>
 	<upperLimit>180.0</upperLimit>
 	<lowerLimit>50.0</lowerLimit>
