@@ -285,14 +285,16 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			// the first link motor is located in the body
 			motor.setManipulator(root)
 			// pull the limb servos out the top
-			motor.addAssemblyStep(1, new Transform().movex(-100))
+			motor.addAssemblyStep(1, new Transform().movex(30))
 		}else {
 			motor=motor.roty(left?180:0)
 			motor=motor.rotz(90)
 			// the rest of the motors are located in the preior link's kinematic frame
 			motor.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
 			// pull the link motors out the thin side
-			motor.addAssemblyStep(1, new Transform().movey(-100))
+			
+			motor.addAssemblyStep(4, new Transform().movez(left?-30:30))
+			motor.addAssemblyStep(5, new Transform().movex(-30))
 		}
 		// do not export the motors to STL for manufacturing
 		motor.setManufacturing({return null})
@@ -307,9 +309,9 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			movedHorn=movedHorn.roty(left?180:0)
 		CSG myServoHorn = moveDHValues(movedHorn,d,linkIndex)
 		if(linkIndex==0)
-			myServoHorn.addAssemblyStep(2, new Transform().movey(-10))
+			myServoHorn.addAssemblyStep(6, new Transform().movey(front?10:-10))
 		else
-			myServoHorn.addAssemblyStep(2, new Transform().movez(10))
+			myServoHorn.addAssemblyStep(6, new Transform().movez(left?-10:10))
 		//reorent the horn for resin printing
 		myServoHorn.setManufacturing({incoming ->
 			return reverseDHValues(incoming, d, linkIndex).toZMin()
@@ -392,11 +394,14 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			})
 			top.getStorage().set("bedType", "ff-Two")
 			bottom.getStorage().set("bedType", "ff-Two")
+			top.addAssemblyStep(2, new Transform().movez(60))
+			bottom.addAssemblyStep(2, new Transform().movez(-60))
 			back.addAll([top,bottom])
 			println "ServoCover's for "+left?"Left":"Right"+front?"Front":"Back"
 		}	
 		
 		bodyCOver.setName("BodyCover")
+		bodyCOver.addAssemblyStep(2, new Transform().movez(80))
 		body.setName("Body")
 		body.setManufacturing({ incoming ->
 			return incoming.rotx(180).toZMin().toXMin().toYMin()
