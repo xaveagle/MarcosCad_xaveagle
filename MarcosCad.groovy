@@ -311,9 +311,9 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 	@Override
 	public ArrayList<CSG> generateBody(MobileBase arg0) {
 		cache.clear()
-		DHParameterKinematics d = arg0.getLegs().get(0);
+		DHParameterKinematics dh = arg0.getLegs().get(0);
 
-		TransformNR dGetRobotToFiducialTransform = d.getRobotToFiducialTransform()
+		TransformNR dGetRobotToFiducialTransform = dh.getRobotToFiducialTransform()
 		double zCenterLine = dGetRobotToFiducialTransform.getZ()+numbers.ServoThickness/2.0
 
 		CSG body  = Vitamins.get(ScriptingEngine.fileFromGit(
@@ -328,8 +328,42 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		CSG BottomCover  = Vitamins.get(ScriptingEngine.fileFromGit(
 				"https://github.com/OperationSmallKat/Marcos.git",
 				"BodyCoverBottom.stl")).movez(zCenterLine);
-		
-			
+		ArrayList<CSG> back =[body, bodyCOver]
+		for(CSG c:back) {
+			c.getStorage().set("bedType", "ff-One")
+		}
+		for(DHParameterKinematics k:arg0.getLegs()) {
+			boolean left=false;
+			boolean front=false;
+			if(k.getRobotToFiducialTransform().getY()>0) {
+				left=true;
+			}
+			if(k.getRobotToFiducialTransform().getX()>0) {
+				front=true;
+			}
+			CSG top = topCOver;
+			CSG bottom = BottomCover
+			if(!left) {
+				top=top.mirrorx()
+				bottom=bottom.mirrorx()
+			}
+			if(!front) {
+				top=top.mirrory()
+				bottom=bottom.mirrory()
+			}
+			top.setName("ServoCoverTop"+left?"Left":"Right"+front?"Front":"Back");
+			bottom.setName("ServoCoverBottom"+left?"Left":"Right"+front?"Front":"Back");
+			top.setManufacturing({ incoming ->
+				return incoming.toZMin().toXMin().toYMin()
+			})
+			bottom.setManufacturing({ incoming ->
+				return incoming.toZMin().toXMin().toYMin().movey(top.getTotalY()+1)
+			})
+			top.getStorage().set("bedType", "ff-Two")
+			bottom.getStorage().set("bedType", "ff-Two")
+			back.addAll([top,bottom])
+			println "ServoCover's for "+left?"Left":"Right"+front?"Front":"Back"
+		}	
 		
 		bodyCOver.setName("BodyCover")
 		body.setName("Body")
@@ -340,16 +374,15 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			return incoming.toZMin().toXMin().toYMin().movey(body.getTotalY()+1)
 		})
 
-		ArrayList<CSG> back =[body, bodyCOver,topCOver,BottomCover]
+		
 		for(CSG c:back) {
 			c.setManipulator(arg0.getRootListener())
-			c.getStorage().set("bedType", "ff-One")
 		}
-		for(DHParameterKinematics kin:arg0.getAllDHChains()) {
-			CSG limbRoot =new Cube(1).toCSG()
-			limbRoot.setManipulator(kin.getRootListener())
-			back.add(limbRoot)
-		}
+//		for(DHParameterKinematics kin:arg0.getAllDHChains()) {
+//			CSG limbRoot =new Cube(1).toCSG()
+//			limbRoot.setManipulator(kin.getRootListener())
+//			back.add(limbRoot)
+//		}
 		cache.addAll(back)
 		return back;
 	}
