@@ -23,21 +23,11 @@ import java.lang.reflect.Type
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
-import com.neuronrobotics.bowlerstudio.BowlerStudioController
-import com.neuronrobotics.bowlerstudio.creature.IgenerateBed
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory
-import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine
-import com.neuronrobotics.sdk.addons.kinematics.MobileBase
-import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR
 import com.neuronrobotics.sdk.common.DeviceManager
 
-import eu.mihosoft.vrl.v3d.CSG
-import eu.mihosoft.vrl.v3d.Cube
 import javafx.application.Platform
-import javafx.scene.paint.Color
-import javafx.scene.transform.Affine
 CSG ChamferedCylinder(double r, double h, double chamferHeight) {
 	CSG cube1 = new Cylinder(r - chamferHeight,r - chamferHeight, h,40).toCSG();
 	CSG cube2 = new Cylinder(r,r, h - chamferHeight * 2,40).toCSG().movez(chamferHeight);
