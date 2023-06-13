@@ -79,7 +79,7 @@ CSG screwHoleCutOut = new Cylinder(numbers.ServoHornScrewDiamter/2.0,numbers.Ser
 		.toZMax()
 		.movez(numbers.ServoHornHeight-cutoutDepth)
 // Cut the holes from the core
-core=core.difference([
+CSG cutcore=core.difference([
 	screwHeadCutOut,
 	screwHoleCutOut
 ])
@@ -105,7 +105,7 @@ def gears = ScriptingEngine.gitScriptRun(
 // get just the pinion of the set
 CSG spline = gears.get(0)
 // cut the spline from the core
-CSG resinPrintServoMount=core.difference(spline)
+CSG resinPrintServoMount=cutcore.difference(spline)
 
 class cadGenMarcos implements ICadGenerator,IgenerateBed{
 	CSG resinPrintServoMount
@@ -187,6 +187,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		// load the vitamin for the servo
 		CSG motor = Vitamins.get(conf.getElectroMechanicalType(),conf.getElectroMechanicalSize())
 					.toZMax()
+					.movez(numbers.JointSpacing/2.0)
 		// Is this value actually something in the CSV?
 		double distanceToMotorTop = motor.getMaxZ();
 		
