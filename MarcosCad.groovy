@@ -163,6 +163,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		ArrayList<CSG> three = []
 		for(CSG bit :cache) {
 			def bitGetStorageGetValue = bit.getStorage().getValue("bedType")
+			String name=bit.getName()
 			File source=new File(ScriptingEngine.getRepositoryCloneDirectory("https://github.com/OperationSmallKat/Marcos.git").getAbsolutePath()+"/print_bed_location_"+name+".json")
 			if(source.exists()) {
 				//println "Loading location from "+source.getAbsolutePath()
