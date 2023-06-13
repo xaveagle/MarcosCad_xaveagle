@@ -816,6 +816,362 @@
 </leg>
 <appendage>
 
+<name>DummyLeftRear</name>
+	<cadEngine>
+		<git>https://github.com/OperationSmallKat/Marcos.git</git>
+		<file>MarcosCad.groovy</file>
+	</cadEngine>
+	<kinematics>
+		<git>https://github.com/OperationSmallKat/Marcos.git</git>
+		<file>MarcosKinematics.groovy</file>
+	</kinematics>
+<link>
+	<name>basePan</name>
+	<deviceName>midnight</deviceName>
+	<type>hidfast</type>
+	<index>10</index>
+	<scale>0.574</scale>
+	<upperLimit>123.0</upperLimit>
+	<lowerLimit>1.0</lowerLimit>
+	<upperVelocity>1.0E8</upperVelocity>
+	<lowerVelocity>-1.0E8</lowerVelocity>
+	<staticOffset>90.0</staticOffset>
+	<deviceTheoreticalMax>180.0</deviceTheoreticalMax>
+	<deviceTheoreticalMin>0.0</deviceTheoreticalMin>
+	<isLatch>true</isLatch>
+	<indexLatch>105.0</indexLatch>
+	<isStopOnLatch>false</isStopOnLatch>
+	<homingTPS>10000000</homingTPS>
+
+	<vitamins>
+		<vitamin>
+			<name>electroMechanical</name>
+			<type>hobbyServo</type>
+			<id>mg92b</id>
+		</vitamin>
+		<vitamin>
+			<name>shaft</name>
+			<type>hobbyServoHorn</type>
+			<id>tproSG90_1</id>
+		</vitamin>
+
+	</vitamins>
+	<passive>false</passive>
+	<mass>0.01</mass>
+	<centerOfMassFromCentroid>	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>0.0</rotx>
+	<roty>0.0</roty>
+	<rotz>0.0</rotz></centerOfMassFromCentroid>
+	<imuFromCentroid>	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>-0.0</rotx>
+	<roty>-0.0</roty>
+	<rotz>-0.0</rotz></imuFromCentroid>
+
+	<DHParameters>
+		<Delta>0.0</Delta>
+		<Theta>0.01</Theta>
+		<Radius>45.5</Radius>
+		<Alpha>-89.97</Alpha>
+	</DHParameters>
+
+</link>
+
+<ZframeToRAS
+>	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>-0.0</rotx>
+	<roty>-0.0</roty>
+	<rotz>-0.0</rotz>
+</ZframeToRAS>
+
+<baseToZframe>
+	<x>-82.5</x>
+	<y>40.75</y>
+	<z>137.0</z>
+	<rotw>-0.4999999999993642</rotw>
+	<rotx>-0.5000000000006357</rotx>
+	<roty>-0.49999999999936423</roty>
+	<rotz>0.5000000000006357</rotz>
+</baseToZframe>
+
+</appendage>
+<appendage>
+
+<name>DummyRightFront</name>
+	<cadEngine>
+		<git>https://github.com/OperationSmallKat/Marcos.git</git>
+		<file>MarcosCad.groovy</file>
+	</cadEngine>
+	<kinematics>
+		<git>https://github.com/OperationSmallKat/Marcos.git</git>
+		<file>MarcosKinematics.groovy</file>
+	</kinematics>
+<link>
+	<name>basePan</name>
+	<deviceName>midnight</deviceName>
+	<type>hidfast</type>
+	<index>2</index>
+	<scale>-0.512698413</scale>
+	<upperLimit>126.0</upperLimit>
+	<lowerLimit>1.0</lowerLimit>
+	<upperVelocity>1.0E8</upperVelocity>
+	<lowerVelocity>-1.0E8</lowerVelocity>
+	<staticOffset>90.0</staticOffset>
+	<deviceTheoreticalMax>180.0</deviceTheoreticalMax>
+	<deviceTheoreticalMin>0.0</deviceTheoreticalMin>
+	<isLatch>true</isLatch>
+	<indexLatch>105.0</indexLatch>
+	<isStopOnLatch>false</isStopOnLatch>
+	<homingTPS>10000000</homingTPS>
+
+	<vitamins>
+		<vitamin>
+			<name>electroMechanical</name>
+			<type>hobbyServo</type>
+			<id>mg92b</id>
+		</vitamin>
+		<vitamin>
+			<name>shaft</name>
+			<type>hobbyServoHorn</type>
+			<id>tproSG90_1</id>
+		</vitamin>
+
+	</vitamins>
+	<passive>false</passive>
+	<mass>0.01</mass>
+	<centerOfMassFromCentroid>	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>0.0</rotx>
+	<roty>0.0</roty>
+	<rotz>0.0</rotz></centerOfMassFromCentroid>
+	<imuFromCentroid>	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>-0.0</rotx>
+	<roty>-0.0</roty>
+	<rotz>-0.0</rotz></imuFromCentroid>
+
+	<DHParameters>
+		<Delta>0.0</Delta>
+		<Theta>0.01</Theta>
+		<Radius>45.5</Radius>
+		<Alpha>-89.97</Alpha>
+	</DHParameters>
+
+</link>
+
+<ZframeToRAS
+>	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>-0.0</rotx>
+	<roty>-0.0</roty>
+	<rotz>-0.0</rotz>
+</ZframeToRAS>
+
+<baseToZframe>
+	<x>82.5</x>
+	<y>-40.75</y>
+	<z>137.0</z>
+	<rotw>0.500043631327946</rotw>
+	<rotx>0.49995636486433614</rotx>
+	<roty>0.49995636486529044</roty>
+	<rotz>-0.5000436313269918</rotz>
+</baseToZframe>
+
+</appendage>
+<appendage>
+
+<name>DummyLeftFront</name>
+	<cadEngine>
+		<git>https://github.com/OperationSmallKat/Marcos.git</git>
+		<file>MarcosCad.groovy</file>
+	</cadEngine>
+	<kinematics>
+		<git>https://github.com/OperationSmallKat/Marcos.git</git>
+		<file>MarcosKinematics.groovy</file>
+	</kinematics>
+<link>
+	<name>basePan</name>
+	<deviceName>midnight</deviceName>
+	<type>hidfast</type>
+	<index>5</index>
+	<scale>-0.512698413</scale>
+	<upperLimit>180.0</upperLimit>
+	<lowerLimit>52.0</lowerLimit>
+	<upperVelocity>1.0E8</upperVelocity>
+	<lowerVelocity>-1.0E8</lowerVelocity>
+	<staticOffset>90.0</staticOffset>
+	<deviceTheoreticalMax>180.0</deviceTheoreticalMax>
+	<deviceTheoreticalMin>0.0</deviceTheoreticalMin>
+	<isLatch>true</isLatch>
+	<indexLatch>105.0</indexLatch>
+	<isStopOnLatch>false</isStopOnLatch>
+	<homingTPS>10000000</homingTPS>
+
+	<vitamins>
+		<vitamin>
+			<name>electroMechanical</name>
+			<type>hobbyServo</type>
+			<id>mg92b</id>
+		</vitamin>
+		<vitamin>
+			<name>shaft</name>
+			<type>hobbyServoHorn</type>
+			<id>tproSG90_1</id>
+		</vitamin>
+
+	</vitamins>
+	<passive>false</passive>
+	<mass>0.01</mass>
+	<centerOfMassFromCentroid>	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>0.0</rotx>
+	<roty>0.0</roty>
+	<rotz>0.0</rotz></centerOfMassFromCentroid>
+	<imuFromCentroid>	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>-0.0</rotx>
+	<roty>-0.0</roty>
+	<rotz>-0.0</rotz></imuFromCentroid>
+
+	<DHParameters>
+		<Delta>0.0</Delta>
+		<Theta>0.01</Theta>
+		<Radius>45.5</Radius>
+		<Alpha>-89.97</Alpha>
+	</DHParameters>
+
+</link>
+
+<ZframeToRAS
+>	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>-0.0</rotx>
+	<roty>-0.0</roty>
+	<rotz>-0.0</rotz>
+</ZframeToRAS>
+
+<baseToZframe>
+	<x>82.5</x>
+	<y>40.75</y>
+	<z>137.0</z>
+	<rotw>0.5000436313277871</rotw>
+	<rotx>-0.4999563648644952</rotx>
+	<roty>0.4999563648651314</roty>
+	<rotz>0.5000436313271508</rotz>
+</baseToZframe>
+
+</appendage>
+<appendage>
+
+<name>DummyRightRear</name>
+	<cadEngine>
+		<git>https://github.com/OperationSmallKat/Marcos.git</git>
+		<file>MarcosCad.groovy</file>
+	</cadEngine>
+	<kinematics>
+		<git>https://github.com/OperationSmallKat/Marcos.git</git>
+		<file>MarcosKinematics.groovy</file>
+	</kinematics>
+<link>
+	<name>basePan</name>
+	<deviceName>midnight</deviceName>
+	<type>hidfast</type>
+	<index>13</index>
+	<scale>0.574</scale>
+	<upperLimit>180.0</upperLimit>
+	<lowerLimit>50.0</lowerLimit>
+	<upperVelocity>1.0E8</upperVelocity>
+	<lowerVelocity>-1.0E8</lowerVelocity>
+	<staticOffset>90.0</staticOffset>
+	<deviceTheoreticalMax>180.0</deviceTheoreticalMax>
+	<deviceTheoreticalMin>0.0</deviceTheoreticalMin>
+	<isLatch>true</isLatch>
+	<indexLatch>105.0</indexLatch>
+	<isStopOnLatch>false</isStopOnLatch>
+	<homingTPS>10000000</homingTPS>
+
+	<vitamins>
+		<vitamin>
+			<name>electroMechanical</name>
+			<type>hobbyServo</type>
+			<id>mg92b</id>
+		</vitamin>
+		<vitamin>
+			<name>shaft</name>
+			<type>hobbyServoHorn</type>
+			<id>tproSG90_1</id>
+		</vitamin>
+
+	</vitamins>
+	<passive>false</passive>
+	<mass>0.01</mass>
+	<centerOfMassFromCentroid>	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>0.0</rotx>
+	<roty>0.0</roty>
+	<rotz>0.0</rotz></centerOfMassFromCentroid>
+	<imuFromCentroid>	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>-0.0</rotx>
+	<roty>-0.0</roty>
+	<rotz>-0.0</rotz></imuFromCentroid>
+
+	<DHParameters>
+		<Delta>0.0</Delta>
+		<Theta>0.0</Theta>
+		<Radius>45.5</Radius>
+		<Alpha>-90.0</Alpha>
+	</DHParameters>
+
+</link>
+
+<ZframeToRAS
+>	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>-0.0</rotx>
+	<roty>-0.0</roty>
+	<rotz>-0.0</rotz>
+</ZframeToRAS>
+
+<baseToZframe>
+	<x>-82.5</x>
+	<y>-40.75</y>
+	<z>137.0</z>
+	<rotw>0.5000436313273856</rotw>
+	<rotx>-0.49995636486489664</rotx>
+	<roty>0.4999563648648967</roty>
+	<rotz>0.5000436313273855</rotz>
+</baseToZframe>
+
+</appendage>
+<appendage>
+
 <name>Head</name>
 	<cadEngine>
 		<git>https://github.com/OperationSmallKat/Marcos.git</git>
@@ -949,9 +1305,9 @@
 </ZframeToRAS>
 
 <baseToZframe>
-	<x>92.5</x>
+	<x>82.5</x>
 	<y>0.0</y>
-	<z>119.575</z>
+	<z>137.0</z>
 	<rotw>0.7071067811865476</rotw>
 	<rotx>-0.7071067811865475</rotx>
 	<roty>-0.0</roty>
@@ -1094,11 +1450,11 @@
 </ZframeToRAS>
 
 <baseToZframe>
-	<x>-92.5</x>
+	<x>-82.5</x>
 	<y>0.0</y>
-	<z>119.58</z>
+	<z>137.0</z>
 	<rotw>6.170670739598364E-5</rotw>
-	<rotx>-6.170670739598362E-5</rotx>
+	<rotx>-6.170670739598361E-5</rotx>
 	<roty>-0.7071067784940844</roty>
 	<rotz>0.7071067784940845</rotz>
 </baseToZframe>
