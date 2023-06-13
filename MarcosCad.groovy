@@ -354,7 +354,8 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 					"https://github.com/OperationSmallKat/Marcos.git",
 					"WristCenter.stl"))
 					.rotz(90)
-					.rotx(90)
+					.movez(-6)
+					//.rotx(90)
 			wrist.setName("WristCenter"+d.getScriptingName())
 			wrist.setManufacturing({ incoming ->
 				return incoming.roty(90).toZMin().toXMin().toYMin()
