@@ -322,6 +322,8 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		CSG bodyCOver  = Vitamins.get(ScriptingEngine.fileFromGit(
 				"https://github.com/OperationSmallKat/Marcos.git",
 				"BodyCover.stl")).movez(zCenterLine);
+		bodyCOver.setName("BodyCover")
+		body.setName("Body")
 		body.setManufacturing({ incoming ->
 			return incoming.rotx(180).toZMin().toXMin().toYMin()
 		})
