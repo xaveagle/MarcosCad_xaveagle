@@ -47,7 +47,6 @@ class GearWrist implements ILinkListener{
 		onLinkPositionUpdate(zero,zero.getCurrentEngineeringUnits())
 		leftTarget.setUseLimits(false)
 		rightTarget.setUseLimits(false)
-		
 	}
 	void disconnect() {
 		println "Disconnecting"
@@ -61,8 +60,12 @@ class GearWrist implements ILinkListener{
 		if(!front)
 			l2=-l2
 		//println "Wrist targets "+l1+":"+l2
-		leftTarget.setTargetEngineeringUnits(l1-l2)
-		rightTarget.setTargetEngineeringUnits(-l1-l2)
+		def l1l2 = l1-l2
+		def l22 = -l1-l2
+		if(leftTarget.getMaxEngineeringUnits()>l1l2&& leftTarget.getDeviceMinEngineeringUnits()<l1l2)
+			leftTarget.setTargetEngineeringUnits(l1l2)
+		if(rightTarget.getMaxEngineeringUnits()>l22&& rightTarget.getDeviceMinEngineeringUnits()<l22)
+			rightTarget.setTargetEngineeringUnits(l22)
 	}
 	@Override
 	public void onLinkLimit(AbstractLink source, PIDLimitEvent event) {
