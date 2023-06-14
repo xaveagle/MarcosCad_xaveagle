@@ -14,6 +14,7 @@ import eu.mihosoft.vrl.v3d.ChamferedCube
 import eu.mihosoft.vrl.v3d.Cube
 import eu.mihosoft.vrl.v3d.Cylinder
 import eu.mihosoft.vrl.v3d.PrepForManufacturing
+import eu.mihosoft.vrl.v3d.RoundedCube
 import eu.mihosoft.vrl.v3d.Sphere
 import eu.mihosoft.vrl.v3d.Transform
 import eu.mihosoft.vrl.v3d.parametrics.LengthParameter
@@ -266,7 +267,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 	}
 	public List<CSG> passiveLink(double rotationCenterToBoltCenter) {
 		double endOfPassiveLinkToBolt = 4.5
-		double defaultValue = numbers.LinkLength
+		double defaultValue = numbers.LinkLength - endOfPassiveLinkToBolt
 		CSG stl= Vitamins.get(ScriptingEngine.fileFromGit(
 				"https://github.com/OperationSmallKat/Marcos.git",
 				"IdleLinkLeg.stl"))
@@ -282,6 +283,11 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		double mountHeadRad =( numbers.MountingScrewHeadDiamter+numbers.LooseTolerance)/2.0
 		double mountRad=( numbers.MountingScrewDiamter+numbers.LooseTolerance)/2.0
 		double decritiveRad = numbers.ServoHornDiameter/4.0
+		double zipTieLugDepth = 4
+		double zipTieWidth=3
+		double zipTieLugDIstanceFromEnd = 3.7
+		double zipTieClerence =1.2
+		double zipTieLugX=rotationCenterToBoltCenter-endOfPassiveLinkToBolt-zipTieLugDIstanceFromEnd
 		// Hull together a toolshape to make the cutter to make the shape appropratly
 		CSG cornerFilletCutter = new Cylinder(filletRad, linkThickness, 30).toCSG()
 		// cut from the corner to the ege of the link
@@ -326,18 +332,42 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		CSG MountHoleCutoutChamfer = ChamferedCylinder(mountRad+smallChamfer,linkThickness+smallChamfer,smallChamfer)
 				.toZMax()
 				.movez(smallChamfer)
-				
+
 		CSG boltHole = new Cylinder(mountRad, linkThickness, 20).toCSG()
 		CSG boltHead = new Cylinder(mountHeadRad, linkThickness, 20).toCSG()
-						.movez(linkThickness-numbers.MountingScrewHeadHeight)
-		CSG decritiveDivit = ChamferedCylinder(decritiveRad+chamfer,chamfer*2+1,chamfer)
-								.movez(linkThickness-chamfer)
-		
+				.movez(linkThickness-numbers.MountingScrewHeadHeight)
 		CSG mountAssebmbly = MountHoleCutoutChamfer
 				.union(MountHeadHoleCutoutChamfer)
 				.union(boltHole)
 				.union(boltHead)
 				.movex(rotationCenterToBoltCenter)
+		CSG zipLug = new RoundedCube(zipTieWidth+chamfer*2,zipTieLugDepth-zipTieClerence,linkThickness-(zipTieClerence*2))
+				.cornerRadius(chamfer)
+				.toCSG()
+				.toZMin()
+				.toXMax()
+				.toYMax()
+				.movex(chamfer)
+				.movez(zipTieClerence)
+		CSG zipTieCut = new Cube(zipTieWidth,zipTieLugDepth,linkThickness).toCSG()
+				.toZMin()
+				.toXMax()
+				.toYMax()
+				.difference(zipLug)
+		CSG bottomChamfer = new ChamferedCube(zipTieWidth+smallChamfer*2,zipTieLugDepth+smallChamfer*2,linkThickness,smallChamfer).toCSG()
+				.toZMax()
+				.toXMax()
+				.toYMax()
+				.movez(smallChamfer)
+				.movex(smallChamfer)
+				.movey(smallChamfer)
+		zipTieCut=zipTieCut.union(bottomChamfer)
+		zipTieCut=zipTieCut.movey(linkWidth/2)
+				.movex(zipTieLugX)
+		CSG rightZipTie=zipTieCut.mirrory()
+		CSG decritiveDivit = ChamferedCylinder(decritiveRad+chamfer,chamfer*2+1,chamfer)
+				.movez(linkThickness-chamfer)
+
 
 		// Assemble the whole link
 		CSG link = lowerEnd
@@ -351,7 +381,11 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				.difference(IdlePinCutout)
 				.difference(mountAssebmbly)
 				.difference(decritiveDivit)
+				.difference(zipTieCut)
+				.difference(rightZipTie)
+
 		//link.setIsWireFrame(true)
+		link.setColor(Color.BLUE)
 		return [link]
 	}
 
