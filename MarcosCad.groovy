@@ -323,7 +323,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				myServoHorn.addAssemblyStep(9, new Transform().movez(left?-10:10))
 		}else {
 			myServoHorn.addAssemblyStep(4, new Transform().movex(isDummyGearWrist?-30:30))
-			
+
 		}
 		//reorent the horn for resin printing
 		myServoHorn.setManufacturing({incoming ->
@@ -342,7 +342,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		if(isDummyGearWrist) {
 			motor.addAssemblyStep(3, new Transform().movez(front?60:-60))
 			myServoHorn.addAssemblyStep(3, new Transform().movey(front?-50:50))
-			
+
 			CSG tmp =Vitamins.get(ScriptingEngine.fileFromGit(
 					"https://github.com/OperationSmallKat/Marcos.git",
 					"DriveGear.stl"))
@@ -355,7 +355,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			CSG wrist= moveDHValues(tmp, d, linkIndex)
 			wrist.addAssemblyStep(4, new Transform().movex(isDummyGearWrist?-30:30))
 			wrist.addAssemblyStep(3, new Transform().movey(front?-20:20))
-			
+
 			//.rotx(90)
 			wrist.setName("DriveGear"+d.getScriptingName())
 			wrist.setManufacturing({ incoming ->
@@ -401,7 +401,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 					.rotz(90)
 					.movez(-wristCenterOffset)
 			wrist.addAssemblyStep(4, new Transform().movez(30))
-			
+
 			wrist.setName("WristCenter"+d.getScriptingName())
 			wrist.setManufacturing({ incoming ->
 				return incoming.roty(90).toZMin().toXMin().toYMin()
@@ -410,19 +410,50 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			back.add(wrist)
 		}
 		if(linkIndex==1) {
-			CSG wrist= Vitamins.get(ScriptingEngine.fileFromGit(
+			String name= d.getScriptingName();
+
+			CSG gearLink= Vitamins.get(ScriptingEngine.fileFromGit(
 					"https://github.com/OperationSmallKat/Marcos.git",
-					"WristCenter.stl"))
-					.rotz(90)
-					.movez(-wristCenterOffset)
-			wrist.addAssemblyStep(4, new Transform().movez(30))
-			
-			wrist.setName("WristCenter"+d.getScriptingName())
-			wrist.setManufacturing({ incoming ->
+					"GearLink.stl"))
+
+					.movez(16.25)
+			gearLink.addAssemblyStep(4, new Transform().movez(30))
+			gearLink.setName("GearLink"+d.getScriptingName())
+			gearLink.setManufacturing({ incoming ->
 				return incoming.roty(90).toZMin().toXMin().toYMin()
 			})
-			wrist.getStorage().set("bedType", "ff-One")
-			back.add(wrist)
+			gearLink.getStorage().set("bedType", "ff-One")
+			back.add(gearLink)
+
+			CSG headtail= Vitamins.get(ScriptingEngine.fileFromGit(
+					"https://github.com/OperationSmallKat/Marcos.git",
+					name+".stl"))
+					.rotz(180)
+					.toXMin()
+			if(name.contentEquals("Head")) {
+				headtail=headtail.roty(-37)
+						.movez(-wristCenterOffset-1)
+						.movex(6.6)
+				headtail.setManufacturing({ incoming ->
+					return incoming.roty(90).toZMin().toXMin().toYMin()
+				})
+			}
+			if(name.contentEquals("Tail")) {
+				headtail=headtail
+						.movez(-0.7)
+						.movex(26.7)
+						.movey(-headtail.getTotalY()/2)
+				headtail.setManufacturing({ incoming ->
+					return incoming.roty(90).toZMin().toXMin().toYMin()
+				})
+			}
+			headtail.addAssemblyStep(4, new Transform().movez(30))
+			headtail.setName(name+"_"+d.getScriptingName())
+
+			headtail.getStorage().set("bedType", "ff-One")
+			back.add(headtail)
+
+
 		}
 
 		for(CSG c:back)
