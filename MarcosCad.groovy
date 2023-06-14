@@ -10,6 +10,7 @@ import com.neuronrobotics.sdk.addons.kinematics.MobileBase
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR
 
 import eu.mihosoft.vrl.v3d.CSG
+import eu.mihosoft.vrl.v3d.ChamferedCube
 import eu.mihosoft.vrl.v3d.Cube
 import eu.mihosoft.vrl.v3d.Cylinder
 import eu.mihosoft.vrl.v3d.PrepForManufacturing
@@ -40,7 +41,7 @@ double computeGearPitch(double diameterAtCrown,double numberOfTeeth){
 }
 // Load the devices to map the kinematics of the gear wrist
 // this is loaded here in case in the future we need to pass the gear ratio to the gear wrist kinematics.
-ScriptingEngine.gitScriptRun("https://github.com/OperationSmallKat/Marcos.git", "GearWristKinematics.groovy")
+//ScriptingEngine.gitScriptRun("https://github.com/OperationSmallKat/Marcos.git", "GearWristKinematics.groovy")
 
 url = "https://github.com/OperationSmallKat/Marcos.git"
 File parametricsCSV = ScriptingEngine.fileFromGit(url, "parametrics.csv")
@@ -253,6 +254,106 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 
 		return bedOne
 	}
+	CSG ChamferedCylinder(double r, double h, double chamferHeight) {
+		CSG c1 = new Cylinder(r - chamferHeight,r - chamferHeight, h,40).toCSG();
+		CSG c2 = new Cylinder(r,r, h - chamferHeight * 2,40).toCSG().movez(chamferHeight);
+		return c1.union(c2).hull()
+	}
+	CSG ChamferedRoundCornerLug(double x, double y,double r, double h, double chamferHeight) {
+		CSG corners = ChamferedCylinder(r,h,chamferHeight)
+		CSG xSec= corners.union(corners.movex(x-r*2))
+		return xSec.union(xSec.movey(y-(r*2))).hull().toXMin().toYMin().movex(-x/2).movey(-y/2)
+	}
+	public List<CSG> passiveLink(double rotationCenterToBoltCenter) {
+		double endOfPassiveLinkToBolt = 4.5
+		double defaultValue = numbers.LinkLength
+		CSG stl= Vitamins.get(ScriptingEngine.fileFromGit(
+				"https://github.com/OperationSmallKat/Marcos.git",
+				"IdleLinkLeg.stl"))
+		double chamfer = numbers.Chamfer2
+		double smallChamfer = numbers.Chamfer1
+		double linkWidth = numbers.LinkWidth
+		double linkThickness = numbers.LinkHeight
+		double filletRad=numbers.Fillet3
+		double LinkMountingCutOutWidth=numbers.LinkMountingCutOutWidth
+		double blockx=rotationCenterToBoltCenter-numbers.LinkMountingCutOutLength-numbers.Tolerance+endOfPassiveLinkToBolt+filletRad
+		double IdlePinRad=numbers.IdlePinDiamter/2.0
+		double idlePinHeight  =numbers.IdlePinThickness+numbers.LooseTolerance
+		double mountHeadRad =( numbers.MountingScrewHeadDiamter+numbers.LooseTolerance)/2.0
+		double mountRad=( numbers.MountingScrewDiamter+numbers.LooseTolerance)/2.0
+		double decritiveRad = numbers.ServoHornDiameter/4.0
+		// Hull together a toolshape to make the cutter to make the shape appropratly
+		CSG cornerFilletCutter = new Cylinder(filletRad, linkThickness, 30).toCSG()
+		// cut from the corner to the ege of the link
+		cornerFilletCutter=cornerFilletCutter.union(cornerFilletCutter.movey(LinkMountingCutOutWidth)).hull()
+		// cut from the corner to the end of where the fillet should end
+		cornerFilletCutter=cornerFilletCutter.union(cornerFilletCutter.movex(chamfer)).hull()
+		CSG leftCorner = cornerFilletCutter.movex(blockx).movey(linkWidth/2-LinkMountingCutOutWidth+filletRad)
+		CSG rightCorner = cornerFilletCutter.movex(blockx).movey(-linkWidth/2-filletRad)
+
+		CSG lowerEnd = ChamferedCylinder(linkWidth/2, linkThickness, chamfer)
+		CSG linkBlock = new ChamferedCube(blockx+chamfer, linkWidth, linkThickness, chamfer).toCSG()
+				.toZMin()
+				.toXMin()
+		// Trim the end chamfer off the end of the link block to make the end flat
+		linkBlock=linkBlock.intersect(linkBlock.getBoundingBox().movex(-chamfer))
+		// Use chamferd cylendars to make the lug at the end of the link
+		CSG mountLug = ChamferedRoundCornerLug(blockx, linkWidth-(LinkMountingCutOutWidth*2),filletRad, linkThickness+chamfer, chamfer)
+				.toZMin()
+				.toXMax()
+		// Make a champfered cylendar to make the inner chamfer radius'
+		CSG LowerInnerCornerChamferCutLeft= ChamferedCylinder(filletRad+chamfer, chamfer*2+1, chamfer)
+				.movex(blockx)
+				.movey(linkWidth/2-LinkMountingCutOutWidth+filletRad)
+				.toZMax()
+				.movez(chamfer)
+		LowerInnerCornerChamferCutLeft=LowerInnerCornerChamferCutLeft.union(LowerInnerCornerChamferCutLeft.movey(LinkMountingCutOutWidth)).hull()
+		CSG LowerInnerCornerChamferCutRight = LowerInnerCornerChamferCutLeft.movey(-linkWidth)
+		// trim off the top chamfers and mofe the block end to the tip of the link block
+		mountLug=mountLug.difference(mountLug.getBoundingBox().movez(linkThickness))
+				.movex(rotationCenterToBoltCenter+endOfPassiveLinkToBolt)
+
+		CSG IdlePinCutoutChamfer = ChamferedCylinder(IdlePinRad+smallChamfer,idlePinHeight+smallChamfer,smallChamfer)
+				.toZMax()
+				.movez(smallChamfer)
+		// Idle pin cutout
+		CSG IdlePinCutout = ChamferedCylinder(IdlePinRad,idlePinHeight,smallChamfer)
+				.movez(-smallChamfer)
+				.union(IdlePinCutoutChamfer)
+		CSG MountHeadHoleCutoutChamfer = ChamferedCylinder(mountHeadRad+smallChamfer,linkThickness+smallChamfer,smallChamfer)
+				.toZMin()
+				.movez(linkThickness-smallChamfer)
+		CSG MountHoleCutoutChamfer = ChamferedCylinder(mountRad+smallChamfer,linkThickness+smallChamfer,smallChamfer)
+				.toZMax()
+				.movez(smallChamfer)
+				
+		CSG boltHole = new Cylinder(mountRad, linkThickness, 20).toCSG()
+		CSG boltHead = new Cylinder(mountHeadRad, linkThickness, 20).toCSG()
+						.movez(linkThickness-numbers.MountingScrewHeadHeight)
+		CSG decritiveDivit = ChamferedCylinder(decritiveRad+chamfer,chamfer*2+1,chamfer)
+								.movez(linkThickness-chamfer)
+		
+		CSG mountAssebmbly = MountHoleCutoutChamfer
+				.union(MountHeadHoleCutoutChamfer)
+				.union(boltHole)
+				.union(boltHead)
+				.movex(rotationCenterToBoltCenter)
+
+		// Assemble the whole link
+		CSG link = lowerEnd
+				.union(linkBlock)
+				.hull()
+				.union(mountLug)
+				.difference(leftCorner)
+				.difference(rightCorner)
+				.difference(LowerInnerCornerChamferCutRight)
+				.difference(LowerInnerCornerChamferCutLeft)
+				.difference(IdlePinCutout)
+				.difference(mountAssebmbly)
+				.difference(decritiveDivit)
+		//link.setIsWireFrame(true)
+		return [link]
+	}
 
 	@Override
 	public ArrayList<CSG> generateCad(DHParameterKinematics d, int linkIndex) {
@@ -422,7 +523,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 					.movez(16.25)
 			gearLink.addAssemblyStep(4, new Transform().movez(30))
 			gearLink.addAssemblyStep(2, new Transform().movez(30))
-			
+
 			gearLink.setName("GearLink"+d.getScriptingName())
 			gearLink.setManufacturing({ incoming ->
 				return incoming.roty(180).toZMin().toXMin().toYMin()
@@ -454,7 +555,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			}
 			headtail.addAssemblyStep(4, new Transform().movez(30))
 			headtail.addAssemblyStep(2, new Transform().movex(30))
-			
+
 			headtail.setName(name+"_"+d.getScriptingName())
 
 			headtail.getStorage().set("bedType", "ff-One")
@@ -587,6 +688,9 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 
 
 }
-return new cadGenMarcos(resinPrintServoMount,numbers)
+def gen= new cadGenMarcos(resinPrintServoMount,numbers)
 
+return [gen.passiveLink(32-4.5)]
+
+return gen
 
