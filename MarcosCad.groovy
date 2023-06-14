@@ -341,6 +341,27 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			foot.setName("Dummy Foot")
 			back.add(foot)
 		}
+		if(isDummyGearWrist) {
+			CSG tmp =Vitamins.get(ScriptingEngine.fileFromGit(
+					"https://github.com/OperationSmallKat/Marcos.git",
+					"DriveGear.stl"))
+					.roty(front?180:0)
+			if(front)
+				tmp=tmp.toZMax()
+			else
+				tmp=tmp.toZMin()
+			tmp=tmp.movez((front?-1:1)*distanceToMotorTop)
+			CSG wrist= moveDHValues(tmp, d, linkIndex)
+
+			//.rotx(90)
+			wrist.setName("DriveGear"+d.getScriptingName())
+			wrist.setManufacturing({ incoming ->
+				return incoming.rotx(front?-90:90).toZMin().toXMin().toYMin()
+			})
+			wrist.getStorage().set("bedType", "ff-One")
+			wrist.setManipulator(d.getLinkObjectManipulator(linkIndex))
+			back.add(wrist)
+		}
 		motor.setName(conf.getElectroMechanicalSize())
 		back.add(motor)
 		cache.addAll(back)
@@ -355,7 +376,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 					"WristCenter.stl"))
 					.rotz(90)
 					.movez(-6)
-					//.rotx(90)
+			//.rotx(90)
 			wrist.setName("WristCenter"+d.getScriptingName())
 			wrist.setManufacturing({ incoming ->
 				return incoming.roty(90).toZMin().toXMin().toYMin()
