@@ -1,3 +1,4 @@
+import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics
 import com.neuronrobotics.sdk.addons.kinematics.IDriveEngine
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase
@@ -5,7 +6,8 @@ import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR
 import com.neuronrobotics.sdk.common.DeviceManager
 import com.neuronrobotics.sdk.common.Log
-
+// Load the gear-wrist kinematics with default values when controller starts (headless mode nessissary)
+ScriptingEngine.gitScriptRun("https://github.com/OperationSmallKat/Marcos.git", "GearWristKinematics.groovy")
 IDriveEngine engine = new IDriveEngine () {
 	/**
 	* Driving kinematics should be implemented in here
@@ -40,7 +42,8 @@ IDriveEngine engine = new IDriveEngine () {
 	double stepOverHeight = 7
 	public void DriveArc(MobileBase source,TransformNR newPose,double seconds) {
 		try {
-		
+			
+			
 			def con = DeviceManager.getSpecificDevice("BodyController-"+source.getScriptingName(),{
 				BodyController bc= new BodyController()
 				bc.connect();
