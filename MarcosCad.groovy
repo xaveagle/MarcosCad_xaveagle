@@ -420,7 +420,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			gearLink.addAssemblyStep(4, new Transform().movez(30))
 			gearLink.setName("GearLink"+d.getScriptingName())
 			gearLink.setManufacturing({ incoming ->
-				return incoming.roty(90).toZMin().toXMin().toYMin()
+				return incoming.roty(180).toZMin().toXMin().toYMin()
 			})
 			gearLink.getStorage().set("bedType", "ff-One")
 			back.add(gearLink)
@@ -435,7 +435,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 						.movez(-wristCenterOffset-1)
 						.movex(6.6)
 				headtail.setManufacturing({ incoming ->
-					return incoming.roty(90).toZMin().toXMin().toYMin()
+					return incoming.roty(37).toZMin().toXMin().toYMin()
 				})
 			}
 			if(name.contentEquals("Tail")) {
@@ -444,7 +444,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 						.movex(26.7)
 						.movey(-headtail.getTotalY()/2)
 				headtail.setManufacturing({ incoming ->
-					return incoming.roty(90).toZMin().toXMin().toYMin()
+					return incoming.rotx(90).toZMin().toXMin().toYMin()
 				})
 			}
 			headtail.addAssemblyStep(4, new Transform().movez(30))
