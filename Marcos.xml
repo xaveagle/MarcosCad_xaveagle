@@ -831,7 +831,7 @@
 	<type>hidfast</type>
 	<index>12</index>
 	<scale>0.574</scale>
-	<upperLimit>123.0</upperLimit>
+	<upperLimit>180.0</upperLimit>
 	<lowerLimit>1.0</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
 	<lowerVelocity>-1.0E8</lowerVelocity>
@@ -893,13 +893,13 @@
 </ZframeToRAS>
 
 <baseToZframe>
-	<x>-82.5</x>
-	<y>40.75</y>
+	<x>-85.0</x>
+	<y>40.25</y>
 	<z>137.0</z>
-	<rotw>-0.4999999999993642</rotw>
-	<rotx>-0.5000000000006357</rotx>
-	<roty>-0.49999999999936423</roty>
-	<rotz>0.5000000000006357</rotz>
+	<rotw>-0.4999999999993643</rotw>
+	<rotx>-0.5000000000006358</rotx>
+	<roty>-0.49999999999936434</roty>
+	<rotz>0.5000000000006358</rotz>
 </baseToZframe>
 
 </appendage>
@@ -920,7 +920,7 @@
 	<type>hidfast</type>
 	<index>11</index>
 	<scale>-0.512698413</scale>
-	<upperLimit>126.0</upperLimit>
+	<upperLimit>180.0</upperLimit>
 	<lowerLimit>1.0</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
 	<lowerVelocity>-1.0E8</lowerVelocity>
@@ -982,8 +982,8 @@
 </ZframeToRAS>
 
 <baseToZframe>
-	<x>82.5</x>
-	<y>-40.75</y>
+	<x>85.0</x>
+	<y>-40.25</y>
 	<z>137.0</z>
 	<rotw>0.500043631327946</rotw>
 	<rotx>0.49995636486433614</rotx>
@@ -1010,7 +1010,7 @@
 	<index>4</index>
 	<scale>-0.512698413</scale>
 	<upperLimit>180.0</upperLimit>
-	<lowerLimit>52.0</lowerLimit>
+	<lowerLimit>0.0</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
 	<lowerVelocity>-1.0E8</lowerVelocity>
 	<staticOffset>90.0</staticOffset>
@@ -1071,8 +1071,8 @@
 </ZframeToRAS>
 
 <baseToZframe>
-	<x>82.5</x>
-	<y>40.75</y>
+	<x>85.0</x>
+	<y>40.25</y>
 	<z>137.0</z>
 	<rotw>0.5000436313277871</rotw>
 	<rotx>-0.4999563648644952</rotx>
@@ -1099,7 +1099,7 @@
 	<index>3</index>
 	<scale>0.574</scale>
 	<upperLimit>180.0</upperLimit>
-	<lowerLimit>50.0</lowerLimit>
+	<lowerLimit>0.0</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
 	<lowerVelocity>-1.0E8</lowerVelocity>
 	<staticOffset>90.0</staticOffset>
@@ -1160,8 +1160,8 @@
 </ZframeToRAS>
 
 <baseToZframe>
-	<x>-82.5</x>
-	<y>-40.75</y>
+	<x>-85.0</x>
+	<y>-40.25</y>
 	<z>137.0</z>
 	<rotw>0.5000436313273856</rotw>
 	<rotx>-0.49995636486489664</rotx>
@@ -1182,7 +1182,7 @@
 		<file>MarcosKinematics.groovy</file>
 	</kinematics>
 <link>
-	<name>basePan</name>
+	<name>tilt</name>
 	<deviceName>midnight</deviceName>
 	<type>hidfast</type>
 	<index>20</index>
@@ -1238,7 +1238,7 @@
 
 </link>
 <link>
-	<name>baseTilt</name>
+	<name>pan</name>
 	<deviceName>midnight</deviceName>
 	<type>hidfast</type>
 	<index>19</index>
@@ -1305,7 +1305,7 @@
 </ZframeToRAS>
 
 <baseToZframe>
-	<x>82.5</x>
+	<x>85.0</x>
 	<y>0.0</y>
 	<z>137.0</z>
 	<rotw>0.7071067811865476</rotw>
@@ -1450,7 +1450,7 @@
 </ZframeToRAS>
 
 <baseToZframe>
-	<x>-82.5</x>
+	<x>-85.0</x>
 	<y>0.0</y>
 	<z>137.0</z>
 	<rotw>6.170670739598364E-5</rotw>
