@@ -38,6 +38,9 @@ CSG ChamferedCylinder(double r, double h, double chamferHeight) {
 double computeGearPitch(double diameterAtCrown,double numberOfTeeth){
 	return ((diameterAtCrown/2)*((360.0)/numberOfTeeth)*Math.PI/180)
 }
+// Load the devices to map the kinematics of the gear wrist
+// this is loaded here in case in the future we need to pass the gear ratio to the gear wrist kinematics.
+ScriptingEngine.gitScriptRun("https://github.com/OperationSmallKat/Marcos.git", "GearWristKinematics.groovy")
 
 url = "https://github.com/OperationSmallKat/Marcos.git"
 File parametricsCSV = ScriptingEngine.fileFromGit(url, "parametrics.csv")
