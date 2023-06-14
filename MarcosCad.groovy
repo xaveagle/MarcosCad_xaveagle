@@ -392,7 +392,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 	}
 	CSG decorationGen(double rotationCenterToBoltCenter) {
 		double backOffset = 4
-		
+
 		double chamfer = numbers.Chamfer2
 		double LugDepth = numbers.LinkLength-rotationCenterToBoltCenter
 		double x=rotationCenterToBoltCenter-LugDepth+chamfer-numbers.LinkDetailSize/2-backOffset
@@ -403,7 +403,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				.movez(chamfer)
 		CSG largeCut=ChamferedCylinder(numbers.LinkWidth/2, chamfer*2+1, chamfer)
 				.toZMax()
-				.movez(chamfer)				
+				.movez(chamfer)
 				.movex(rotationCenterToBoltCenter)
 		CSG lug = ChamferedRoundCornerLug(x,y,filletRad,chamfer*2+1,chamfer)
 				.toXMin()
@@ -554,8 +554,10 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				link=link.rotz(-90+numbers.FootAngle)
 			}
 			CSG wrist= moveDHValues(link, d, linkIndex)
-			wrist.addAssemblyStep(4, new Transform().movex(isDummyGearWrist?-30:30))
-			wrist.addAssemblyStep(3, new Transform().movey(front?20:-20))
+			if(linkIndex!=0)
+				wrist.addAssemblyStep(10, new Transform().movez(left?20:-20))
+			else
+				wrist.addAssemblyStep(10, new Transform().movey(front?-20:20))
 
 			//.rotx(90)
 			wrist.setName("PassiveLink"+d.getScriptingName())
