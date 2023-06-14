@@ -293,7 +293,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			// the first link motor is located in the body
 			motor.setManipulator(root)
 			// pull the limb servos out the top
-			motor.addAssemblyStep(1, new Transform().movex(isDummyGearWrist?-30:30))
+			motor.addAssemblyStep(4, new Transform().movex(isDummyGearWrist?-30:30))
 		}else {
 			motor=motor.roty(left?180:0)
 			motor=motor.rotz(90)
@@ -301,8 +301,8 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			motor.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
 			// pull the link motors out the thin side
 
-			motor.addAssemblyStep(4, new Transform().movez(left?-30:30))
-			motor.addAssemblyStep(5, new Transform().movex(-30))
+			motor.addAssemblyStep(7, new Transform().movez(left?-30:30))
+			motor.addAssemblyStep(8, new Transform().movex(-30))
 		}
 		// do not export the motors to STL for manufacturing
 		motor.setManufacturing({return null})
@@ -316,10 +316,15 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		else
 			movedHorn=movedHorn.roty(left?180:0)
 		CSG myServoHorn = moveDHValues(movedHorn,d,linkIndex)
-		if(linkIndex==0)
-			myServoHorn.addAssemblyStep(6, new Transform().movey(front?10:-10))
-		else
-			myServoHorn.addAssemblyStep(6, new Transform().movez(left?-10:10))
+		if(!isDummyGearWrist) {
+			if(linkIndex==0)
+				myServoHorn.addAssemblyStep(9, new Transform().movey(front?10:-10))
+			else
+				myServoHorn.addAssemblyStep(9, new Transform().movez(left?-10:10))
+		}else {
+			myServoHorn.addAssemblyStep(4, new Transform().movex(isDummyGearWrist?-30:30))
+			
+		}
 		//reorent the horn for resin printing
 		myServoHorn.setManufacturing({incoming ->
 			return reverseDHValues(incoming, d, linkIndex).toZMin()
@@ -333,15 +338,11 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		myServoHorn.setManipulator(dGetLinkObjectManipulator)
 		back.add(myServoHorn)
 		//end horn link
-		if(linkIndex==2) {
-			// this section is a place holder to visualize the tip of the limb
-			CSG foot = new Sphere(10).toCSG()
-			foot.setManipulator(dGetLinkObjectManipulator)
-			foot.setManufacturing({return null})
-			foot.setName("Dummy Foot")
-			back.add(foot)
-		}
+
 		if(isDummyGearWrist) {
+			motor.addAssemblyStep(3, new Transform().movez(front?60:-60))
+			myServoHorn.addAssemblyStep(3, new Transform().movey(front?-50:50))
+			
 			CSG tmp =Vitamins.get(ScriptingEngine.fileFromGit(
 					"https://github.com/OperationSmallKat/Marcos.git",
 					"DriveGear.stl"))
@@ -352,7 +353,9 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				tmp=tmp.toZMin()
 			tmp=tmp.movez((front?-1:1)*distanceToMotorTop)
 			CSG wrist= moveDHValues(tmp, d, linkIndex)
-
+			wrist.addAssemblyStep(4, new Transform().movex(isDummyGearWrist?-30:30))
+			wrist.addAssemblyStep(3, new Transform().movey(front?-20:20))
+			
 			//.rotx(90)
 			wrist.setName("DriveGear"+d.getScriptingName())
 			wrist.setManufacturing({ incoming ->
@@ -361,6 +364,15 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			wrist.getStorage().set("bedType", "ff-One")
 			wrist.setManipulator(d.getLinkObjectManipulator(linkIndex))
 			back.add(wrist)
+		}else {
+			if(linkIndex==2) {
+				// this section is a place holder to visualize the tip of the limb
+				CSG foot = new Sphere(10).toCSG()
+				foot.setManipulator(dGetLinkObjectManipulator)
+				foot.setManufacturing({return null})
+				foot.setName("Dummy Foot")
+				back.add(foot)
+			}
 		}
 		motor.setName(conf.getElectroMechanicalSize())
 		back.add(motor)
@@ -368,15 +380,43 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		return back;
 	}
 	public ArrayList<CSG> generateCadHeadTail(DHParameterKinematics d, int linkIndex) {
-		// TODO Auto-generated method stub
+		boolean left=false;
+		boolean front=false;
+		boolean isDummyGearWrist = false;
+		if(d.getScriptingName().startsWith("Dummy")) {
+			isDummyGearWrist=true;
+		}
+		if(d.getRobotToFiducialTransform().getY()>0) {
+			left=true;
+		}
+		if(d.getRobotToFiducialTransform().getX()>0) {
+			front=true;
+		}
 		ArrayList<CSG> back =[]
+		double wristCenterOffset = 6
 		if(linkIndex==0) {
 			CSG wrist= Vitamins.get(ScriptingEngine.fileFromGit(
 					"https://github.com/OperationSmallKat/Marcos.git",
 					"WristCenter.stl"))
 					.rotz(90)
-					.movez(-6)
-			//.rotx(90)
+					.movez(-wristCenterOffset)
+			wrist.addAssemblyStep(4, new Transform().movez(30))
+			
+			wrist.setName("WristCenter"+d.getScriptingName())
+			wrist.setManufacturing({ incoming ->
+				return incoming.roty(90).toZMin().toXMin().toYMin()
+			})
+			wrist.getStorage().set("bedType", "ff-One")
+			back.add(wrist)
+		}
+		if(linkIndex==1) {
+			CSG wrist= Vitamins.get(ScriptingEngine.fileFromGit(
+					"https://github.com/OperationSmallKat/Marcos.git",
+					"WristCenter.stl"))
+					.rotz(90)
+					.movez(-wristCenterOffset)
+			wrist.addAssemblyStep(4, new Transform().movez(30))
+			
 			wrist.setName("WristCenter"+d.getScriptingName())
 			wrist.setManufacturing({ incoming ->
 				return incoming.roty(90).toZMin().toXMin().toYMin()
@@ -444,8 +484,8 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			})
 			top.getStorage().set("bedType", "ff-Two")
 			bottom.getStorage().set("bedType", "ff-Two")
-			top.addAssemblyStep(2, new Transform().movez(60))
-			bottom.addAssemblyStep(2, new Transform().movez(-60))
+			top.addAssemblyStep(5, new Transform().movez(60))
+			bottom.addAssemblyStep(5, new Transform().movez(-60))
 			back.addAll([top, bottom])
 			println "ServoCover's for "+left?"Left":"Right"+front?"Front":"Back"
 		}
@@ -485,7 +525,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		}
 
 		bodyCOver.setName("BodyCover")
-		bodyCOver.addAssemblyStep(2, new Transform().movez(80))
+		bodyCOver.addAssemblyStep(5, new Transform().movez(80))
 		body.setName("Body")
 		body.setManufacturing({ incoming ->
 			return incoming.rotx(180).toZMin().toXMin().toYMin()
