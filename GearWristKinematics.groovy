@@ -13,6 +13,9 @@ class GearWrist implements ILinkListener{
 	AbstractLink leftTarget;
 	AbstractLink rightTarget;
 	boolean front
+
+	AbstractLink zero;
+	AbstractLink one ;
 	public GearWrist(String n){
 		name=n
 		marcos=DeviceManager.getSpecificDevice( "Marcos",{
@@ -41,24 +44,56 @@ class GearWrist implements ILinkListener{
 	}
 	boolean connect() {
 		println "Connecting"
-		AbstractLink zero=source.getAbstractLink(0)
+		zero=source.getAbstractLink(0)
+		one =source.getAbstractLink(1)
 		zero.addLinkListener(this)
-		source.getAbstractLink(1).addLinkListener(this)
+		one.addLinkListener(this)
 		onLinkPositionUpdate(zero,zero.getCurrentEngineeringUnits())
 		leftTarget.setUseLimits(false)
 		rightTarget.setUseLimits(false)
 	}
 	void disconnect() {
 		println "Disconnecting"
-		source.getAbstractLink(0).removeLinkListener(this)
-		source.getAbstractLink(1).removeLinkListener(this)
+		zero.removeLinkListener(this)
+		one.removeLinkListener(this)
 	}
 	@Override
 	public void onLinkPositionUpdate(AbstractLink s, double engineeringUnitsValue) {
-		double l1=source.getAbstractLink(0).getCurrentEngineeringUnits();
-		double l2=source.getAbstractLink(1).getCurrentEngineeringUnits();
+		double l1=zero.getCurrentEngineeringUnits();
+		double l2=one.getCurrentEngineeringUnits();
 		if(!front)
 			l2=-l2
+//		if(s==zero) {
+//			double l2Max = leftTarget.getMaxEngineeringUnits()
+//			double r2Max = rightTarget.getMaxEngineeringUnits()
+//			double l2Min = leftTarget.getMinEngineeringUnits()
+//			double r2Min = rightTarget.getMinEngineeringUnits()
+//			if(!front) {
+//				l2Max=-l2Max
+//				r2Max=-r2Max
+//				l2Min=-l2Min
+//				r2Min=-r2Min
+//			}
+//			double newl1max =  l1-l2Max
+//			double newl1min =  l1-l2Min
+//			double newr1max =  l1-r2Max
+//			double newr1min =  l1-r2Min
+//
+//			double highestMax = newl1max
+//			if(newr1max<highestMax)
+//				highestMax=newr1max
+//			double lowestMin = newl1min
+//			if(newr1min>lowestMin)
+//				lowestMin=newr1min
+//			//if(one.getMaxEngineeringUnits()>highestMax) {
+//				println "Set Upper Limit "+highestMax
+//				//one.setMaxEngineeringUnits(highestMax)
+//			//}
+//			//if(one.getMinEngineeringUnits()<lowestMin) {
+//				println "Set Lower Limit "+lowestMin
+//				//one.setMinEngineeringUnits(lowestMin)
+//			//}
+//		}
 		//println "Wrist targets "+l1+":"+l2
 		def l1l2 = l1-l2
 		def l22 = -l1-l2
