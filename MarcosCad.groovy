@@ -129,6 +129,8 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 	CSG resinPrintServoMount
 	HashMap<String,Double> numbers
 	LengthParameter tailLength		= new LengthParameter("Cable Cut Out Length",30,[500, 0.01])
+	double endOfPassiveLinkToBolt = 4.5
+
 	Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 
 	public cadGenMarcos(CSG res,HashMap<String,Double> n) {
@@ -153,7 +155,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 	 * @param base the base to generate
 	 * @return simulatable CAD objects
 	 */
-	public ArrayList<CSG> arrangeBed(MobileBase base){
+	ArrayList<CSG> arrangeBed(MobileBase base){
 		println "Generating Marcos Print Bed"
 		ArrayList<CSG> resin = []
 		ArrayList<CSG> one = []
@@ -237,7 +239,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 
 	}
 
-	private CSG toBed(ArrayList<CSG> parts, String name) {
+	CSG toBed(ArrayList<CSG> parts, String name) {
 		CSG bedOne=null
 		for(CSG p:parts) {
 			if(bedOne==null)
@@ -265,8 +267,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		CSG xSec= corners.union(corners.movex(x-r*2))
 		return xSec.union(xSec.movey(y-(r*2))).hull().toXMin().toYMin().movex(-x/2).movey(-y/2)
 	}
-	public List<CSG> passiveLink(double rotationCenterToBoltCenter) {
-		double endOfPassiveLinkToBolt = 4.5
+	public CSG passiveLink(double rotationCenterToBoltCenter) {
 		double defaultValue = numbers.LinkLength - endOfPassiveLinkToBolt
 		CSG stl= Vitamins.get(ScriptingEngine.fileFromGit(
 				"https://github.com/OperationSmallKat/Marcos.git",
@@ -367,7 +368,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		CSG rightZipTie=zipTieCut.mirrory()
 		CSG decritiveDivit = ChamferedCylinder(decritiveRad+chamfer,chamfer*2+1,chamfer)
 				.movez(linkThickness-chamfer)
-
+		CSG decoration = decorationGen(rotationCenterToBoltCenter)
 
 		// Assemble the whole link
 		CSG link = lowerEnd
@@ -383,10 +384,36 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				.difference(decritiveDivit)
 				.difference(zipTieCut)
 				.difference(rightZipTie)
+				.difference(decoration)
 
 		//link.setIsWireFrame(true)
-		link.setColor(Color.BLUE)
-		return [link]
+		link.setColor(Color.RED)
+		return link
+	}
+	CSG decorationGen(double rotationCenterToBoltCenter) {
+		double backOffset = 4
+		
+		double chamfer = numbers.Chamfer2
+		double LugDepth = numbers.LinkLength-rotationCenterToBoltCenter
+		double x=rotationCenterToBoltCenter-LugDepth+chamfer-numbers.LinkDetailSize/2-backOffset
+		double y=numbers.LinkWidth-numbers.LinkDetailSize*2+chamfer*2
+		double filletRad=numbers.Fillet3
+		CSG smallCut=ChamferedCylinder((numbers.LinkWidth-numbers.LinkDetailSize*2)/2, chamfer*2+1, chamfer)
+				.toZMax()
+				.movez(chamfer)
+		CSG largeCut=ChamferedCylinder(numbers.LinkWidth/2, chamfer*2+1, chamfer)
+				.toZMax()
+				.movez(chamfer)				
+				.movex(rotationCenterToBoltCenter)
+		CSG lug = ChamferedRoundCornerLug(x,y,filletRad,chamfer*2+1,chamfer)
+				.toXMin()
+				.movex(-chamfer+backOffset)
+				.difference(largeCut)
+				.difference(smallCut)
+				.movez(numbers.LinkHeight-chamfer)
+
+
+		return lug
 	}
 
 	@Override
@@ -511,6 +538,33 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				foot.setName("Dummy Foot")
 				back.add(foot)
 			}
+			double kinematicsLen = d.getDH_R(linkIndex)
+			double staticOffset = 55.500-numbers.LinkLength-endOfPassiveLinkToBolt
+			double calculated = kinematicsLen-staticOffset
+			double parametric = numbers.LinkLength-endOfPassiveLinkToBolt
+			CSG link = passiveLink(parametric)
+					.movez(distanceToMotorTop)
+					.rotx(linkIndex==0&&(!front)?180:0)
+					.rotx(linkIndex!=0&&(!left)?180:0)
+					.rotz(-d.getDH_Theta(linkIndex))
+			if(linkIndex==1) {
+				link=link.rotz(45)
+			}
+			if(linkIndex==2) {
+				link=link.rotz(-90+numbers.FootAngle)
+			}
+			CSG wrist= moveDHValues(link, d, linkIndex)
+			wrist.addAssemblyStep(4, new Transform().movex(isDummyGearWrist?-30:30))
+			wrist.addAssemblyStep(3, new Transform().movey(front?20:-20))
+
+			//.rotx(90)
+			wrist.setName("PassiveLink"+d.getScriptingName())
+			wrist.setManufacturing({ incoming ->
+				return incoming.rotx(front?-90:90).toZMin().toXMin().toYMin()
+			})
+			wrist.getStorage().set("bedType", "ff-One")
+			wrist.setManipulator(d.getLinkObjectManipulator(linkIndex))
+			back.add(wrist)
 		}
 		motor.setName(conf.getElectroMechanicalSize())
 		back.add(motor)
