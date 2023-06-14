@@ -421,6 +421,8 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 
 					.movez(16.25)
 			gearLink.addAssemblyStep(4, new Transform().movez(30))
+			gearLink.addAssemblyStep(2, new Transform().movez(30))
+			
 			gearLink.setName("GearLink"+d.getScriptingName())
 			gearLink.setManufacturing({ incoming ->
 				return incoming.roty(180).toZMin().toXMin().toYMin()
@@ -451,6 +453,8 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				})
 			}
 			headtail.addAssemblyStep(4, new Transform().movez(30))
+			headtail.addAssemblyStep(2, new Transform().movex(30))
+			
 			headtail.setName(name+"_"+d.getScriptingName())
 
 			headtail.getStorage().set("bedType", "ff-One")
