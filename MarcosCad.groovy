@@ -729,7 +729,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			link.setManufacturing({ incoming ->
 				return incoming.roty(180).toZMin().toXMin().toYMin()
 			})
-			link.getStorage().set("bedType", "ff-One")
+			link.getStorage().set("bedType", "ff-Three")
 			back.add(link)
 			CSG gearLink= Vitamins.get(ScriptingEngine.fileFromGit(
 					"https://github.com/OperationSmallKat/Marcos.git",
