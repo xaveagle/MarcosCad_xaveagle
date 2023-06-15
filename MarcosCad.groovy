@@ -859,7 +859,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		spars.getStorage().set("bedType", "ff-Two")
 		
 
-		cache.addAll([spars])
+		back.addAll([spars])
 
 		for(CSG c:back) {
 			c.setManipulator(arg0.getRootListener())
