@@ -478,6 +478,42 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		//Start the horn link
 		// move the horn from tip of the link space, to the Motor of the last link space
 		// note the hore is moved to the centerline distance value before the transform to link space
+		if(!isDummyGearWrist) {
+			CSG movedDrive = Vitamins.get(ScriptingEngine.fileFromGit(
+					"https://github.com/OperationSmallKat/Marcos.git",
+					"DriveLink.stl")).movez(distanceToMotorTop)//.rotz(180)
+			double xrot=180
+			xrot+=linkIndex==0&&(!front)?180:0
+			xrot+=linkIndex!=0&&(!left)?180:0
+			movedDrive=movedDrive.rotx(xrot)
+			double zrotVal = -d.getDH_Theta(linkIndex)
+			if(linkIndex==1) {
+				zrotVal+=45
+			}
+			if(linkIndex==2) {
+				zrotVal+=(-90+numbers.FootAngle)
+			}
+			movedDrive=movedDrive.rotz(zrotVal)
+			CSG myDriveLink = moveDHValues(movedDrive,d,linkIndex)
+			if(!isDummyGearWrist) {
+				if(linkIndex==0)
+					myDriveLink.addAssemblyStep(9, new Transform().movey(front?10:-10))
+				else
+					myDriveLink.addAssemblyStep(9, new Transform().movez(left?-10:10))
+			}else {
+				myDriveLink.addAssemblyStep(4, new Transform().movex(isDummyGearWrist?-30:30))
+
+			}
+			//reorent the horn for resin printing
+			myDriveLink.setManufacturing({incoming ->
+				return reverseDHValues(incoming.rotz(-zrotVal).rotx(-xrot), d, linkIndex).toZMin()
+			})
+			myDriveLink.getStorage().set("bedType", "ff-Two")
+			myDriveLink.setName("DriveLink "+linkIndex+" "+d.getScriptingName())
+			// attach this links manipulator
+			myDriveLink.setManipulator(dGetLinkObjectManipulator)
+			back.add(myDriveLink)
+		}
 		CSG movedHorn = resinPrintServoMount.movez(distanceToMotorTop)
 		if(linkIndex==0)
 			movedHorn=movedHorn.roty(front?180:0)
@@ -491,7 +527,6 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				myServoHorn.addAssemblyStep(9, new Transform().movez(left?-10:10))
 		}else {
 			myServoHorn.addAssemblyStep(4, new Transform().movex(isDummyGearWrist?-30:30))
-
 		}
 		//reorent the horn for resin printing
 		myServoHorn.setManufacturing({incoming ->
@@ -850,14 +885,19 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				.hull()
 				.difference(footLeftRear)
 				.difference(footRightRear)
-		CSG spars = Center.union([FrontSpar, RearSpar, fCal,rCal])
+		CSG spars = Center.union([
+			FrontSpar,
+			RearSpar,
+			fCal,
+			rCal
+		])
 		//		CSG LeftFrontbox=calBlock.move(tipLeftFront.x, tipLeftFront.y, tipLeftFront.z).difference(footLeftFront)
 		//		CSG RightFrontbox=calBlock.move(tipRightFront.x, tipRightFront.y, tipRightFront.z).difference(footRightFront)
 		//		CSG LeftRearbox=calBlock.move(tipLeftRear.x, tipLeftRear.y, tipLeftRear.z).difference(footLeftRear)
 		//		CSG RightRearbox=calBlock.move(tipRightRear.x, tipRightRear.y, tipRightRear.z).difference(footRightRear)
 		spars.setName("CalibrationJig")
 		spars.getStorage().set("bedType", "ff-Two")
-		
+
 
 		back.addAll([spars])
 
