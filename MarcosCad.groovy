@@ -388,7 +388,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 
 		//link.setIsWireFrame(true)
 		link.setColor(Color.RED)
-		return link
+		return link//.union(stl)
 	}
 	CSG decorationGen(double rotationCenterToBoltCenter) {
 		double backOffset = 4
@@ -564,7 +564,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			wrist.setManufacturing({ incoming ->
 				return incoming.rotx(front?-90:90).toZMin().toXMin().toYMin()
 			})
-			wrist.getStorage().set("bedType", "ff-One")
+			wrist.getStorage().set("bedType", "ff-Two")
 			wrist.setManipulator(d.getLinkObjectManipulator(linkIndex))
 			back.add(wrist)
 		}
@@ -605,7 +605,20 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		}
 		if(linkIndex==1) {
 			String name= d.getScriptingName();
+			double parametric = numbers.LinkLength-endOfPassiveLinkToBolt
+			CSG link = passiveLink(parametric)
+						.rotx(180)
+						.movez(-15.1)
 
+			link.addAssemblyStep(4, new Transform().movez(30))
+			link.addAssemblyStep(2, new Transform().movez(30))
+
+			link.setName("PassiveLink"+d.getScriptingName())
+			link.setManufacturing({ incoming ->
+				return incoming.roty(180).toZMin().toXMin().toYMin()
+			})
+			link.getStorage().set("bedType", "ff-One")
+			back.add(link)
 			CSG gearLink= Vitamins.get(ScriptingEngine.fileFromGit(
 					"https://github.com/OperationSmallKat/Marcos.git",
 					"GearLink.stl"))

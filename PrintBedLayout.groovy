@@ -32,7 +32,7 @@ double bedX=260
 double bedY=260
 
 def colors =[
-	Color.RED,
+	Color.WHITE,
 	Color.GREY,
 	Color.BLUE,
 	Color.GREEN
