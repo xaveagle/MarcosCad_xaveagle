@@ -28,8 +28,8 @@ import javafx.scene.paint.Color
 import javafx.scene.paint.PhongMaterial
 import javafx.scene.transform.Affine
 
-double bedX=260
-double bedY=260
+double bedX=250
+double bedY=250
 
 def colors =[
 	Color.WHITE,

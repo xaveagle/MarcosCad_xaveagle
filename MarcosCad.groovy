@@ -618,7 +618,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 					"Knee"+(left?"Left":"Right")+".stl"))
 				knee.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
 				knee.setManufacturing({incoming->
-					return incoming.rotx(-90).toZMin()
+					return incoming.rotx(-90).toZMin().rotz(left?180:0)
 				})
 				knee.getStorage().set("bedType", "ff-One")
 				knee.setName("Knee"+d.getScriptingName())
