@@ -123,6 +123,7 @@ def gears = ScriptingEngine.gitScriptRun(
 CSG spline = gears.get(0)
 // cut the spline from the core
 CSG resinPrintServoMount=cutcore.difference(spline)
+resinPrintServoMount.setColor(Color.DARKGREY)
 
 class cadGenMarcos implements ICadGenerator,IgenerateBed{
 	String url = "https://github.com/OperationSmallKat/Marcos.git"
@@ -532,27 +533,33 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		}else {
 			if(linkIndex==2) {
 				// this section is a place holder to visualize the tip of the limb
-				CSG foot = new Sphere(10).toCSG()
+				CSG foot = getFoot() 
 				foot.setManipulator(dGetLinkObjectManipulator)
-				foot.setManufacturing({return null})
-				foot.setName("Dummy Foot")
+				foot.setManufacturing({incoming->
+					return incoming.rotx(90).roty(90-numbers.FootAngle).toZMin().rotz(front?180:0)
+				})
+				foot.getStorage().set("bedType", "ff-Two")
+				foot.setName("Foot")
 				back.add(foot)
 			}
 			double kinematicsLen = d.getDH_R(linkIndex)
 			double staticOffset = 55.500-numbers.LinkLength-endOfPassiveLinkToBolt
 			double calculated = kinematicsLen-staticOffset
 			double parametric = numbers.LinkLength-endOfPassiveLinkToBolt
+			double xrot=0
 			CSG link = passiveLink(parametric)
 					.movez(distanceToMotorTop)
-					.rotx(linkIndex==0&&(!front)?180:0)
-					.rotx(linkIndex!=0&&(!left)?180:0)
-					.rotz(-d.getDH_Theta(linkIndex))
+			xrot+=linkIndex==0&&(!front)?180:0
+			xrot+=linkIndex!=0&&(!left)?180:0
+			link=link.rotx(xrot)
+			double zrotVal = -d.getDH_Theta(linkIndex)
 			if(linkIndex==1) {
-				link=link.rotz(45)
+				zrotVal+=45
 			}
 			if(linkIndex==2) {
-				link=link.rotz(-90+numbers.FootAngle)
+				zrotVal+=(-90+numbers.FootAngle)
 			}
+			link=link.rotz(zrotVal)
 			CSG wrist= moveDHValues(link, d, linkIndex)
 			if(linkIndex!=0)
 				wrist.addAssemblyStep(10, new Transform().movez(left?20:-20))
@@ -560,9 +567,9 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				wrist.addAssemblyStep(10, new Transform().movey(front?-20:20))
 
 			//.rotx(90)
-			wrist.setName("PassiveLink"+d.getScriptingName())
+			wrist.setName("PassiveLink"+d.getScriptingName()+linkIndex)
 			wrist.setManufacturing({ incoming ->
-				return incoming.rotx(front?-90:90).toZMin().toXMin().toYMin()
+				return reverseDHValues( incoming.rotz(-zrotVal).rotx(-xrot), d, linkIndex).toZMin().toXMin().toYMin()
 			})
 			wrist.getStorage().set("bedType", "ff-Two")
 			wrist.setManipulator(d.getLinkObjectManipulator(linkIndex))
@@ -577,6 +584,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		boolean left=false;
 		boolean front=false;
 		boolean isDummyGearWrist = false;
+		double neckLenFudge = 4.5
 		if(d.getScriptingName().startsWith("Dummy")) {
 			isDummyGearWrist=true;
 		}
@@ -606,7 +614,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		if(linkIndex==1) {
 			String name= d.getScriptingName();
 			double parametric = numbers.LinkLength-endOfPassiveLinkToBolt
-			CSG link = passiveLink(parametric)
+			CSG link = passiveLink(parametric+neckLenFudge)
 						.rotx(180)
 						.movez(-15.1)
 
@@ -671,6 +679,13 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			c.setManipulator(d.getLinkObjectManipulator(linkIndex))
 		cache.addAll(back)
 		return back;
+	}
+	
+	CSG getFoot() {
+		CSG foot  = Vitamins.get(ScriptingEngine.fileFromGit(
+			"https://github.com/OperationSmallKat/Marcos.git",
+			"Foot.stl"))
+			.rotx(180)
 	}
 	@Override
 	public ArrayList<CSG> generateBody(MobileBase arg0) {
