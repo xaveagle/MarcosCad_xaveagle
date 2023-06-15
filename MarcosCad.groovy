@@ -455,13 +455,14 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		Affine root = d.getRootListener()
 
 		double link1Rotz=-90
+		double MototRetractDist =15
 		if(linkIndex==0) {
 			motor=motor.rotz(left?180:0)
 			motor=motor.roty(front?180:0)
 			// the first link motor is located in the body
 			motor.setManipulator(root)
 			// pull the limb servos out the top
-			motor.addAssemblyStep(4, new Transform().movex(isDummyGearWrist?-30:30))
+			motor.addAssemblyStep(4, new Transform().movex(isDummyGearWrist?-30:MototRetractDist))
 		}else {
 			motor=motor.roty(left?180:0)
 			motor=motor.rotz(linkIndex==2?90:90+link1Rotz)
@@ -469,7 +470,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			motor.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
 			// pull the link motors out the thin side
 
-			motor.addAssemblyStep(7, new Transform().movex(linkIndex==1?15:0).movey(linkIndex==2?15:0))
+			motor.addAssemblyStep(7, new Transform().movex(linkIndex==1?MototRetractDist:0).movey(linkIndex==2?-MototRetractDist:0))
 			//motor.addAssemblyStep(8, new Transform().movex(-30))
 		}
 		// do not export the motors to STL for manufacturing
@@ -606,24 +607,26 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				CSG kneeCover = Vitamins.get(ScriptingEngine.fileFromGit(
 						"https://github.com/OperationSmallKat/Marcos.git",
 						"KneeCover.stl"))
-				if(left)
+						.rotx(180)
+				if(!left)
 					kneeCover=kneeCover.mirrorz()
 				kneeCover.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
 				kneeCover.setManufacturing({incoming->
-					return incoming.rotx(-90).toZMin()
+					return incoming.rotx(180).rotx(-90).toZMin()
 				})
 				kneeCover.getStorage().set("bedType", "ff-One")
 				kneeCover.setName("KneeCover"+d.getScriptingName())
-				kneeCover.addAssemblyStep(12, new Transform().movey(10))
+				kneeCover.addAssemblyStep(12, new Transform().movey(-10))
 				kneeCover.addAssemblyStep(11, new Transform().movez(left?-coverDistance:coverDistance))
 				back.add(kneeCover)
 
 				CSG knee = Vitamins.get(ScriptingEngine.fileFromGit(
 						"https://github.com/OperationSmallKat/Marcos.git",
 						"Knee"+(left?"Left":"Right")+".stl"))
+						.rotx(180)
 				knee.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
 				knee.setManufacturing({incoming->
-					return incoming.rotx(-90).toZMin().rotz(left?180:0)
+					return incoming.rotx(-180).rotx(-90).toZMin().rotz(left?180:0)
 				})
 				knee.getStorage().set("bedType", "ff-One")
 				knee.setName("Knee"+d.getScriptingName())
