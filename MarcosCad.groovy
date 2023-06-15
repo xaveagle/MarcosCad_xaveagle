@@ -454,7 +454,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		// UI manipulator for the root of the limb
 		Affine root = d.getRootListener()
 
-
+		double link1Rotz=-90
 		if(linkIndex==0) {
 			motor=motor.rotz(left?180:0)
 			motor=motor.roty(front?180:0)
@@ -464,7 +464,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			motor.addAssemblyStep(4, new Transform().movex(isDummyGearWrist?-30:30))
 		}else {
 			motor=motor.roty(left?180:0)
-			motor=motor.rotz(90)
+			motor=motor.rotz(linkIndex==2?90:90+link1Rotz)
 			// the rest of the motors are located in the preior link's kinematic frame
 			motor.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
 			// pull the link motors out the thin side
@@ -568,8 +568,62 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			wrist.setManipulator(d.getLinkObjectManipulator(linkIndex))
 			back.add(wrist)
 		}else {
+			if(linkIndex==1) {
+				// this section is a place holder to visualize the tip of the limb
+				CSG kneeCover = Vitamins.get(ScriptingEngine.fileFromGit(
+					"https://github.com/OperationSmallKat/Marcos.git",
+					"ShoulderCover.stl"))
+					.rotz(link1Rotz)
+				if(left)
+					kneeCover=kneeCover.mirrorz()
+				kneeCover.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
+				kneeCover.setManufacturing({incoming->
+					return incoming.rotx(-90).toZMin()
+				})
+				kneeCover.getStorage().set("bedType", "ff-Two")
+				kneeCover.setName("ShoulderCover"+d.getScriptingName())
+				back.add(kneeCover)
+				
+				CSG knee = Vitamins.get(ScriptingEngine.fileFromGit(
+					"https://github.com/OperationSmallKat/Marcos.git",
+					"Shoulder.stl"))
+					.rotz(link1Rotz)
+				if(left)
+					knee=knee.mirrorz()
+				knee.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
+				knee.setManufacturing({incoming->
+					return incoming.rotx(-90).toZMin()
+				})
+				knee.getStorage().set("bedType", "ff-Two")
+				knee.setName("Shoulder"+d.getScriptingName())
+				back.add(knee)
+			}
 			if(linkIndex==2) {
 				// this section is a place holder to visualize the tip of the limb
+				CSG kneeCover = Vitamins.get(ScriptingEngine.fileFromGit(
+					"https://github.com/OperationSmallKat/Marcos.git",
+					"KneeCover.stl"))
+				if(left)
+					kneeCover=kneeCover.mirrorz()
+				kneeCover.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
+				kneeCover.setManufacturing({incoming->
+					return incoming.rotx(-90).toZMin()
+				})
+				kneeCover.getStorage().set("bedType", "ff-One")
+				kneeCover.setName("KneeCover"+d.getScriptingName())
+				back.add(kneeCover)
+				
+				CSG knee = Vitamins.get(ScriptingEngine.fileFromGit(
+					"https://github.com/OperationSmallKat/Marcos.git",
+					"Knee"+(left?"Left":"Right")+".stl"))
+				knee.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
+				knee.setManufacturing({incoming->
+					return incoming.rotx(-90).toZMin()
+				})
+				knee.getStorage().set("bedType", "ff-One")
+				knee.setName("Knee"+d.getScriptingName())
+				back.add(knee)
+				
 				CSG foot = getFoot()
 				foot.setManipulator(dGetLinkObjectManipulator)
 				foot.setManufacturing({incoming->
@@ -578,6 +632,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				foot.getStorage().set("bedType", "ff-Two")
 				foot.setName("Foot"+d.getScriptingName())
 				back.add(foot)
+				
 			}
 			double kinematicsLen = d.getDH_R(linkIndex)
 			double staticOffset = 55.500-numbers.LinkLength-endOfPassiveLinkToBolt
@@ -896,7 +951,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		//		CSG LeftRearbox=calBlock.move(tipLeftRear.x, tipLeftRear.y, tipLeftRear.z).difference(footLeftRear)
 		//		CSG RightRearbox=calBlock.move(tipRightRear.x, tipRightRear.y, tipRightRear.z).difference(footRightRear)
 		spars.setName("CalibrationJig")
-		spars.getStorage().set("bedType", "ff-Two")
+		spars.getStorage().set("bedType", "ff-Three")
 
 
 		back.addAll([spars])
