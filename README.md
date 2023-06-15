@@ -1,2 +1,3 @@
 # Marcos
-BowlerStudio native source for SmallKat Isis model
+
+BowlerStudio native source for SmallKat Marcos model
