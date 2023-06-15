@@ -35,7 +35,7 @@ def colors =[
 	Color.WHITE,
 	Color.GREY,
 	Color.BLUE,
-	Color.GREEN
+	Color.TAN
 ]
 
 class PrintBedObject{
