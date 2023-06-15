@@ -578,7 +578,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 					kneeCover=kneeCover.mirrorz()
 				kneeCover.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
 				kneeCover.setManufacturing({incoming->
-					return incoming.rotx(-90).toZMin()
+					return incoming.rotx(-90).toZMin().roty(90).toZMin()
 				})
 				kneeCover.getStorage().set("bedType", "ff-Two")
 				kneeCover.setName("ShoulderCover"+d.getScriptingName())
@@ -592,7 +592,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 					knee=knee.mirrorz()
 				knee.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
 				knee.setManufacturing({incoming->
-					return incoming.rotx(-90).toZMin()
+					return incoming.rotx(-90).roty(-90).toZMin()
 				})
 				knee.getStorage().set("bedType", "ff-Two")
 				knee.setName("Shoulder"+d.getScriptingName())
