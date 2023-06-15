@@ -469,8 +469,8 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			motor.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
 			// pull the link motors out the thin side
 
-			motor.addAssemblyStep(7, new Transform().movez(left?-30:30))
-			motor.addAssemblyStep(8, new Transform().movex(-30))
+			motor.addAssemblyStep(7, new Transform().movex(linkIndex==1?15:0).movey(linkIndex==2?15:0))
+			//motor.addAssemblyStep(8, new Transform().movex(-30))
 		}
 		// do not export the motors to STL for manufacturing
 		motor.setManufacturing({return null})
@@ -497,9 +497,9 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			CSG myDriveLink = moveDHValues(movedDrive,d,linkIndex)
 			if(!isDummyGearWrist) {
 				if(linkIndex==0)
-					myDriveLink.addAssemblyStep(9, new Transform().movey(front?10:-10))
+					myDriveLink.addAssemblyStep(9, new Transform().movey(front?20:-20))
 				else
-					myDriveLink.addAssemblyStep(9, new Transform().movez(left?-10:10))
+					myDriveLink.addAssemblyStep(9, new Transform().movez(left?-20:20))
 			}else {
 				myDriveLink.addAssemblyStep(4, new Transform().movex(isDummyGearWrist?-30:30))
 
@@ -568,12 +568,13 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			wrist.setManipulator(d.getLinkObjectManipulator(linkIndex))
 			back.add(wrist)
 		}else {
+			double coverDistance=80
 			if(linkIndex==1) {
 				// this section is a place holder to visualize the tip of the limb
 				CSG kneeCover = Vitamins.get(ScriptingEngine.fileFromGit(
-					"https://github.com/OperationSmallKat/Marcos.git",
-					"ShoulderCover.stl"))
-					.rotz(link1Rotz)
+						"https://github.com/OperationSmallKat/Marcos.git",
+						"ShoulderCover.stl"))
+						.rotz(link1Rotz)
 				if(left)
 					kneeCover=kneeCover.mirrorz()
 				kneeCover.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
@@ -582,12 +583,14 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				})
 				kneeCover.getStorage().set("bedType", "ff-Two")
 				kneeCover.setName("ShoulderCover"+d.getScriptingName())
+				kneeCover.addAssemblyStep(12, new Transform().movex(10))
+				kneeCover.addAssemblyStep(11, new Transform().movez(left?-coverDistance:coverDistance))
 				back.add(kneeCover)
-				
+
 				CSG knee = Vitamins.get(ScriptingEngine.fileFromGit(
-					"https://github.com/OperationSmallKat/Marcos.git",
-					"Shoulder.stl"))
-					.rotz(link1Rotz)
+						"https://github.com/OperationSmallKat/Marcos.git",
+						"Shoulder.stl"))
+						.rotz(link1Rotz)
 				if(left)
 					knee=knee.mirrorz()
 				knee.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
@@ -601,8 +604,8 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			if(linkIndex==2) {
 				// this section is a place holder to visualize the tip of the limb
 				CSG kneeCover = Vitamins.get(ScriptingEngine.fileFromGit(
-					"https://github.com/OperationSmallKat/Marcos.git",
-					"KneeCover.stl"))
+						"https://github.com/OperationSmallKat/Marcos.git",
+						"KneeCover.stl"))
 				if(left)
 					kneeCover=kneeCover.mirrorz()
 				kneeCover.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
@@ -611,11 +614,13 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				})
 				kneeCover.getStorage().set("bedType", "ff-One")
 				kneeCover.setName("KneeCover"+d.getScriptingName())
+				kneeCover.addAssemblyStep(12, new Transform().movey(10))
+				kneeCover.addAssemblyStep(11, new Transform().movez(left?-coverDistance:coverDistance))
 				back.add(kneeCover)
-				
+
 				CSG knee = Vitamins.get(ScriptingEngine.fileFromGit(
-					"https://github.com/OperationSmallKat/Marcos.git",
-					"Knee"+(left?"Left":"Right")+".stl"))
+						"https://github.com/OperationSmallKat/Marcos.git",
+						"Knee"+(left?"Left":"Right")+".stl"))
 				knee.setManipulator(d.getLinkObjectManipulator(linkIndex-1))
 				knee.setManufacturing({incoming->
 					return incoming.rotx(-90).toZMin().rotz(left?180:0)
@@ -623,7 +628,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				knee.getStorage().set("bedType", "ff-One")
 				knee.setName("Knee"+d.getScriptingName())
 				back.add(knee)
-				
+
 				CSG foot = getFoot()
 				foot.setManipulator(dGetLinkObjectManipulator)
 				foot.setManufacturing({incoming->
@@ -632,7 +637,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				foot.getStorage().set("bedType", "ff-Two")
 				foot.setName("Foot"+d.getScriptingName())
 				back.add(foot)
-				
+
 			}
 			double kinematicsLen = d.getDH_R(linkIndex)
 			double staticOffset = 55.500-numbers.LinkLength-endOfPassiveLinkToBolt
@@ -654,9 +659,9 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			link=link.rotz(zrotVal)
 			CSG wrist= moveDHValues(link, d, linkIndex)
 			if(linkIndex!=0)
-				wrist.addAssemblyStep(10, new Transform().movez(left?20:-20))
+				wrist.addAssemblyStep(10, new Transform().movez(left?5:-5))
 			else
-				wrist.addAssemblyStep(10, new Transform().movey(front?-20:20))
+				wrist.addAssemblyStep(10, new Transform().movey(front?-5:5))
 
 			//.rotx(90)
 			wrist.setName("PassiveLink"+d.getScriptingName()+linkIndex)
@@ -715,7 +720,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			CSG link = getNeckLink()
 
 			link.addAssemblyStep(4, new Transform().movez(30))
-			link.addAssemblyStep(2, new Transform().movez(30))
+			link.addAssemblyStep(2, new Transform().movez(-30))
 
 			link.setName("PassiveLink"+d.getScriptingName())
 			link.setManufacturing({ incoming ->
@@ -844,10 +849,14 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			})
 			top.getStorage().set("bedType", "ff-Two")
 			bottom.getStorage().set("bedType", "ff-Two")
-			top.addAssemblyStep(5, new Transform().movez(60))
-			bottom.addAssemblyStep(5, new Transform().movez(-60))
+			top.addAssemblyStep(6, new Transform().movez(10))
+			bottom.addAssemblyStep(6, new Transform().movez(-10))
+			double distacne = front?80:-80
+			top.addAssemblyStep(5, new Transform().movey(distacne))
+			bottom.addAssemblyStep(5, new Transform().movey(distacne))
+
 			back.addAll([top, bottom])
-			println "ServoCover's for "+left?"Left":"Right"+front?"Front":"Back"
+			println "ServoCover's for "+(left?"Left":"Right")+(front?"Front":"Back")
 		}
 		// Set the location of the limbs based on the CSV in the body loader
 		for(DHParameterKinematics d:arg0.getAllDHChains()) {
