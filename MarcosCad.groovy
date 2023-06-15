@@ -23,6 +23,8 @@ import javafx.scene.transform.Affine
 import eu.mihosoft.vrl.v3d.ChamferedCylinder
 import java.lang.reflect.Type
 
+import javax.xml.transform.TransformerFactory
+
 import org.apache.commons.math3.genetics.GeneticAlgorithm
 
 import com.google.gson.Gson
@@ -533,13 +535,13 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		}else {
 			if(linkIndex==2) {
 				// this section is a place holder to visualize the tip of the limb
-				CSG foot = getFoot() 
+				CSG foot = getFoot()
 				foot.setManipulator(dGetLinkObjectManipulator)
 				foot.setManufacturing({incoming->
 					return incoming.rotx(90).roty(90-numbers.FootAngle).toZMin().rotz(front?180:0)
 				})
 				foot.getStorage().set("bedType", "ff-Two")
-				foot.setName("Foot")
+				foot.setName("Foot"+d.getScriptingName())
 				back.add(foot)
 			}
 			double kinematicsLen = d.getDH_R(linkIndex)
@@ -580,11 +582,18 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		cache.addAll(back)
 		return back;
 	}
+	CSG getNeckLink() {
+		double neckLenFudge = 4.5
+		double parametric = numbers.LinkLength-endOfPassiveLinkToBolt
+
+		return passiveLink(parametric+neckLenFudge)
+				.rotx(180)
+				.movez(-15.1)
+	}
 	public ArrayList<CSG> generateCadHeadTail(DHParameterKinematics d, int linkIndex) {
 		boolean left=false;
 		boolean front=false;
 		boolean isDummyGearWrist = false;
-		double neckLenFudge = 4.5
 		if(d.getScriptingName().startsWith("Dummy")) {
 			isDummyGearWrist=true;
 		}
@@ -613,10 +622,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		}
 		if(linkIndex==1) {
 			String name= d.getScriptingName();
-			double parametric = numbers.LinkLength-endOfPassiveLinkToBolt
-			CSG link = passiveLink(parametric+neckLenFudge)
-						.rotx(180)
-						.movez(-15.1)
+			CSG link = getNeckLink()
 
 			link.addAssemblyStep(4, new Transform().movez(30))
 			link.addAssemblyStep(2, new Transform().movez(30))
@@ -680,12 +686,19 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		cache.addAll(back)
 		return back;
 	}
-	
+
 	CSG getFoot() {
 		CSG foot  = Vitamins.get(ScriptingEngine.fileFromGit(
-			"https://github.com/OperationSmallKat/Marcos.git",
-			"Foot.stl"))
-			.rotx(180)
+				"https://github.com/OperationSmallKat/Marcos.git",
+				"Foot.stl"))
+				.rotx(180)
+	}
+	DHParameterKinematics getByName(MobileBase b,String name) {
+		for(DHParameterKinematics k:b.getAllDHChains()) {
+			if(k.getScriptingName().contentEquals(name))
+				return k
+		}
+		return null;
 	}
 	@Override
 	public ArrayList<CSG> generateBody(MobileBase arg0) {
@@ -791,6 +804,62 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			return incoming.toZMin().toXMin().toYMin().movey(body.getTotalY()+1)
 		})
 
+		Transform tipLeftFront = TransformFactory.nrToCSG(getByName(arg0,"LeftFront").calcHome())
+		Transform tipRightFront = TransformFactory.nrToCSG(getByName(arg0,"RightFront").calcHome())
+		Transform tipLeftRear = TransformFactory.nrToCSG(getByName(arg0,"LeftRear").calcHome())
+		Transform tipRightRear = TransformFactory.nrToCSG(getByName(arg0,"RightRear").calcHome())
+
+		Transform neck =TransformFactory.nrToCSG(getByName(arg0,"Head").calcHome())
+		Transform butt =TransformFactory.nrToCSG(getByName(arg0,"Tail").calcHome())
+
+		CSG neckBit = getNeckLink().transformed(neck)
+		CSG buttBit = getNeckLink().transformed(butt)
+
+		CSG calBlock = new ChamferedCube(25,25,20,numbers.Chamfer2).toCSG()
+				.toZMin()
+				.movez(5)
+		CSG calLeft =calBlock.toYMin().movey(2)
+		CSG calRight = calBlock.toYMax().movey(-2)
+		CSG footLeftFront=getFoot().transformed(tipLeftFront)
+		CSG footRightFront=getFoot().transformed(tipRightFront)
+		CSG footLeftRear=getFoot().transformed(tipLeftRear)
+		CSG footRightRear=getFoot().transformed(tipRightRear)
+
+		CSG fCenter=calBlock.move(tipLeftFront.x, 0, tipLeftFront.z)
+		CSG rCenter=calBlock.move(tipRightRear.x, 0, tipRightRear.z)
+		CSG Center = fCenter
+				.union(rCenter)
+				.hull()
+		double calSinkInDistance =4
+		CSG fCal = calBlock.toZMax().move(neck.x, neck.y, neckBit.getMinZ()+numbers.Chamfer2+calSinkInDistance)
+				.union(fCenter)
+				.hull()
+				.difference(neckBit)
+		CSG rCal = calBlock.toZMax().move(butt.x, butt.y, buttBit.getMinZ()+numbers.Chamfer2+calSinkInDistance)
+				.union(rCenter)
+				.hull()
+				.difference(buttBit)
+
+		CSG FrontSpar = calBlock.move(tipLeftFront.x, tipLeftFront.y, tipLeftFront.z)
+				.union(calBlock.move(tipRightFront.x, tipRightFront.y, tipRightFront.z))
+				.hull()
+				.difference(footLeftFront)
+				.difference(footRightFront)
+		CSG RearSpar = calBlock.move(tipLeftRear.x, tipLeftRear.y, tipLeftRear.z)
+				.union(calBlock.move(tipRightRear.x, tipRightRear.y, tipRightRear.z))
+				.hull()
+				.difference(footLeftRear)
+				.difference(footRightRear)
+		CSG spars = Center.union([FrontSpar, RearSpar, fCal,rCal])
+		//		CSG LeftFrontbox=calBlock.move(tipLeftFront.x, tipLeftFront.y, tipLeftFront.z).difference(footLeftFront)
+		//		CSG RightFrontbox=calBlock.move(tipRightFront.x, tipRightFront.y, tipRightFront.z).difference(footRightFront)
+		//		CSG LeftRearbox=calBlock.move(tipLeftRear.x, tipLeftRear.y, tipLeftRear.z).difference(footLeftRear)
+		//		CSG RightRearbox=calBlock.move(tipRightRear.x, tipRightRear.y, tipRightRear.z).difference(footRightRear)
+		spars.setName("CalibrationJig")
+		spars.getStorage().set("bedType", "ff-Two")
+		
+
+		cache.addAll([spars])
 
 		for(CSG c:back) {
 			c.setManipulator(arg0.getRootListener())
