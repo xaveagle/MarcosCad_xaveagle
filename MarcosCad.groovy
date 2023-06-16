@@ -965,6 +965,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		spars.setName("CalibrationJig")
 		spars.getStorage().set("bedType", "ff-Three")
 
+		spars.setManufacturing({incoming -> return incoming.toZMin()})
 
 		back.addAll([spars])
 
