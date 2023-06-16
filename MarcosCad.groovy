@@ -445,7 +445,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				.toZMax()
 				.movez(numbers.JointSpacing/2.0+numbers.LooseTolerance)
 		// Is this value actually something in the CSV?
-		double distanceToMotorTop = motor.getMaxZ();
+		double distanceToMotorTop = motor.getMaxZ()-numbers.LooseTolerance;
 		println "Center to horn distance "+distanceToMotorTop
 		// a list of CSG objects to be rendered
 		ArrayList<CSG> back =[]
@@ -492,7 +492,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 				zrotVal+=45
 			}
 			if(linkIndex==2) {
-				zrotVal+=(-90+numbers.FootAngle)
+				zrotVal+=(-90+numbers.FootAngle)+1
 			}
 			movedDrive=movedDrive.rotz(zrotVal)
 			CSG myDriveLink = moveDHValues(movedDrive,d,linkIndex)
