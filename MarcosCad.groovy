@@ -270,6 +270,20 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		CSG xSec= corners.union(corners.movex(x-r*2))
 		return xSec.union(xSec.movey(y-(r*2))).hull().toXMin().toYMin().movex(-x/2).movey(-y/2)
 	}
+
+	public CSG calibrationLink(double rotationCenterToBoltCenter) {
+		double defaultValue = numbers.LinkLength - endOfPassiveLinkToBolt
+		CSG stl= Vitamins.get(ScriptingEngine.fileFromGit(
+				"https://github.com/OperationSmallKat/Marcos.git",
+				"DriveLink.stl"))
+
+
+		return stl
+	}
+
+
+
+
 	public CSG passiveLink(double rotationCenterToBoltCenter) {
 		double defaultValue = numbers.LinkLength - endOfPassiveLinkToBolt
 		CSG stl= Vitamins.get(ScriptingEngine.fileFromGit(
@@ -428,6 +442,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		boolean left=false;
 		boolean front=false;
 		boolean isDummyGearWrist = false;
+		double parametric = numbers.LinkLength-endOfPassiveLinkToBolt
 		if(d.getScriptingName().startsWith("Dummy")) {
 			isDummyGearWrist=true;
 		}
@@ -480,9 +495,8 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 		// move the horn from tip of the link space, to the Motor of the last link space
 		// note the hore is moved to the centerline distance value before the transform to link space
 		if(!isDummyGearWrist) {
-			CSG movedDrive = Vitamins.get(ScriptingEngine.fileFromGit(
-					"https://github.com/OperationSmallKat/Marcos.git",
-					"DriveLink.stl")).movez(distanceToMotorTop)//.rotz(180)
+			CSG movedDrive = calibrationLink(parametric)
+			.movez(distanceToMotorTop)//.rotz(180)
 			double xrot=180
 			xrot+=linkIndex==0&&(!front)?180:0
 			xrot+=linkIndex!=0&&(!left)?180:0
@@ -645,7 +659,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 			double kinematicsLen = d.getDH_R(linkIndex)
 			double staticOffset = 55.500-numbers.LinkLength-endOfPassiveLinkToBolt
 			double calculated = kinematicsLen-staticOffset
-			double parametric = numbers.LinkLength-endOfPassiveLinkToBolt
+			
 			double xrot=0
 			CSG link = passiveLink(parametric)
 					.movez(distanceToMotorTop)
@@ -985,7 +999,7 @@ class cadGenMarcos implements ICadGenerator,IgenerateBed{
 }
 def gen= new cadGenMarcos(resinPrintServoMount,numbers)
 
-//return [gen.passiveLink(32-4.5)]
+//return [gen.calibrationLink(32-4.5)]
 
 return gen
 
